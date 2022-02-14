@@ -1,0 +1,18 @@
+{
+  "name": "cathpilot",
+  "version": "0.0.1",
+  "description": "cathpilot mono repo",
+  "scripts": {
+    "install": "npm run v:install || npm run c:install",
+    "format": "npm run v:format || npm run c:format",
+
+    "c:install": "cd collection && python3 -m pip install -r requirements.txt",
+    "c:format": "black collection",
+    "v:install": "cd visualization && npm install",
+    "v:format": "cd visualization && npm run format"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kabhari/cathpilot.git"
+  }
+}
