@@ -6,9 +6,12 @@ import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
 
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
-    def SendCoordination(self, request, context):
-        print("got coordinates:%i,%i" % (request.x, request.y))
-        return coordinate_pb2.CoordinateResponse(message="got it")
+    def SendCoordination(self, request_iterator, context):
+        for coordinate in request_iterator:
+            print("got coordinates:%i,%i" % (coordinate.x, coordinate.y))
+        return coordinate_pb2.CoordinateResponse(
+            message="Client recieved all coordinates"
+        )
 
 
 def main():
