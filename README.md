@@ -11,7 +11,10 @@ Make sure your VSCode has the following Extensions:
 
 ### Install
 
+Ensure you have the [Protocol Buffer Compiler](https://grpc.io/docs/protoc-installation/) installed globally
+
 - Run `npm run install`
+- Run `npm run proto`
 
 ## Execute
 
@@ -21,6 +24,7 @@ Make sure your VSCode has the following Extensions:
 
 ### Collection
 
+- [Temporary/testing] Run `cd collection && python3 server.py`
 - Run `npm run c:dev`
 
 ## Format

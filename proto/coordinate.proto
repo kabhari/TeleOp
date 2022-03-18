@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service Coordinate{
+    rpc SendCoordination(CoordinateRequest) returns (CoordinateResponse);
+}
+
+message CoordinateRequest {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message CoordinateResponse {
+    string message  = 1;
+}
