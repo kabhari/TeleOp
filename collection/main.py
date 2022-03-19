@@ -1,11 +1,14 @@
+from sqlite3 import Time
 import grpc
 
 import proto.coordinate_pb2 as coordinate_pb2
 import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
+from google.protobuf.timestamp_pb2 import Timestamp
 
 import random
 import math
 import logging
+from datetime import datetime
 
 
 def random_circle_pnt(radius, center_x, center_y):
@@ -20,16 +23,21 @@ def random_circle_pnt(radius, center_x, center_y):
     return x, y
 
 
-def make_coordinate(x, y):
-    return coordinate_pb2.CoordinateRequest(x=x, y=y)
+def make_coordinate(x, y, t):
+    return coordinate_pb2.CoordinateRequest(x=x, y=y, t=t)
 
 
 def generate_messages():
+    timestamp = Timestamp()
     while True:
+        timestamp.FromDatetime(datetime.now())
         msg = make_coordinate(
-            random_circle_pnt(10, 0, 0)[0], random_circle_pnt(10, 0, 0)[1]
+            random_circle_pnt(10, 0, 0)[0], random_circle_pnt(10, 0, 0)[1], timestamp
         )
-        log.info("Sending %f at %f" % (msg.x, msg.y))
+        log.info(
+            "Sending (%f, %f) at %s"
+            % (msg.x, msg.y, datetime.fromtimestamp(msg.t.seconds + msg.t.nanos / 1e9))
+        )
         yield msg
 
 
