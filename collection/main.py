@@ -5,6 +5,7 @@ import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
 
 import random
 import math
+import logging
 
 
 def random_circle_pnt(radius, center_x, center_y):
@@ -28,7 +29,7 @@ def generate_messages():
         msg = make_coordinate(
             random_circle_pnt(10, 0, 0)[0], random_circle_pnt(10, 0, 0)[1]
         )
-        print("Sending %f at %f" % (msg.x, msg.y))
+        log.info("Sending %f at %f" % (msg.x, msg.y))
         yield msg
 
 
@@ -43,4 +44,11 @@ def run():
         send_message(stub)
 
 
+# setup logging
+logging.basicConfig(
+    format=" %(asctime)s | %(name)s : %(levelname)s | %(message)s",
+    level=logging.INFO,
+)
+log = logging.getLogger("client")
+# execute
 run()

@@ -4,11 +4,13 @@ from concurrent import futures
 import proto.coordinate_pb2 as coordinate_pb2
 import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
 
+import logging
+
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
     def SendCoordination(self, request_iterator, context):
         for coordinate in request_iterator:
-            print("got coordinates:%f,%f" % (coordinate.x, coordinate.y))
+            log.info("got coordinates:%f,%f" % (coordinate.x, coordinate.y))
         return coordinate_pb2.CoordinateResponse(
             message="Client recieved all coordinates"
         )
@@ -20,8 +22,15 @@ def main():
 
     server.add_insecure_port("[::]:50051")
     server.start()
-    print("server started")
+    log.info("server started")
     server.wait_for_termination()
 
 
+# setup logging
+logging.basicConfig(
+    format=" %(asctime)s | %(name)s : %(levelname)s | %(message)s",
+    level=logging.INFO,
+)
+log = logging.getLogger("server")
+# execute
 main()
