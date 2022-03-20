@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 service Coordinate{
-    rpc SendCoordination(stream CoordinateRequest) returns (CoordinateResponse);
+    rpc ReceiveCoordination(stream CoordinateRequest) returns (CoordinateResponse);
 }
 
 message CoordinateRequest {
