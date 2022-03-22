@@ -6,8 +6,7 @@
 
 Make sure your VSCode has the following Extensions:
 
-- Vue Language Features
-- TypeScript Vue Plugin
+- Vue Volar extension Pack
 
 ### Install
 
