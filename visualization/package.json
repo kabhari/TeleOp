@@ -1,13 +1,20 @@
 {
   "name": "visualization",
   "version": "0.0.1",
+  "main": "server/server.js",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "format": "prettier .  --write"
+    "format": "prettier .  --write",
+    "start": "tsc --outDir server && node server/src/server",
+    "proto": "node scripts/protos "
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.4.4",
     "vue": "^3.2.25"
   },
   "devDependencies": {
@@ -19,6 +26,10 @@
     "tailwindcss": "^3.0.22",
     "typescript": "^4.4.4",
     "vite": "^2.7.2",
-    "vue-tsc": "^0.29.8"
+    "vue-tsc": "^0.29.8",
+    "ts-proto": "^1.90.0",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4",
+    "grpc-tools": "^1.11.2"
   }
 }
