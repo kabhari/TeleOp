@@ -2,7 +2,7 @@ import grpc
 import random
 import math
 import logging
-from datetime import datetime
+import datetime
 
 import proto.coordinate_pb2 as coordinate_pb2
 import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
@@ -36,9 +36,9 @@ def generate_messages():
     # We are making use of protobuf's Timestamp() to transfer timestamps
     timestamp = Timestamp()
     # Inifinite loop to send data from stub (client) to the server
-    for _ in range(1, 10):
+    while True:
         # stamp the data with current date + time
-        timestamp.FromDatetime(datetime.now())
+        timestamp.FromDatetime(datetime.datetime.now())
         # construct the message
         msg = coordinate_pb2.CoordinateRequest(
             x=generate_random_pnt_circle(10, 0, 0)[0],
@@ -46,7 +46,7 @@ def generate_messages():
             t=timestamp,
         )
         log.info(
-            f"Sending ({msg.x}, {msg.y}) at {datetime.fromtimestamp(msg.t.seconds + msg.t.nanos / 1e9)}"
+            f"Sending ({msg.x}, {msg.y}) at {datetime.datetime.fromtimestamp(msg.t.seconds + msg.t.nanos / 1e9)}"
         )
         yield msg
 

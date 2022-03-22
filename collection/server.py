@@ -1,10 +1,11 @@
 import grpc
 from concurrent import futures
 import logging
-from datetime import datetime
+import datetime
 
 import proto.coordinate_pb2 as coordinate_pb2
 import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
@@ -19,10 +20,19 @@ class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
         Returns:
             msg: Proto message returned by the server upon recieving all the coordinates (in case there is a finite number of coordinates)
         """
+        timestamp = Timestamp()
         for coordinate in request_iterator:
+            sentTime = datetime.datetime.fromtimestamp(
+                coordinate.t.seconds + coordinate.t.nanos / 1e9
+            )
+            # ToDo: this is a very hacky implementation but for whatever reason serializing `now()` w/ protobuf's Timestamp results in -2 hrs shift! /
+            # Need a better solution but this works for now.
+            timestamp.FromDatetime(datetime.datetime.now())
+            receivedTime = datetime.datetime.fromtimestamp(
+                timestamp.seconds + timestamp.nanos / 1e9
+            )
             log.info(
-                f"got coordinates: ({coordinate.x},{coordinate.y}) at \
-                {datetime.fromtimestamp(coordinate.t.seconds + coordinate.t.nanos / 1e9)}"
+                f"got coordinates: ({coordinate.x},{coordinate.y}) :: sent @ {sentTime} :: received @ {receivedTime} :: with delta of {(receivedTime - sentTime).total_seconds()*1e3} milliseconds"
             )
         return coordinate_pb2.CoordinateResponse(
             message="Server recieved the coordinate"
