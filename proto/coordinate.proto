@@ -1,12 +1,15 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 service Coordinate{
-    rpc SendCoordination(CoordinateRequest) returns (CoordinateResponse);
+    rpc ReceiveCoordination(stream CoordinateRequest) returns (CoordinateResponse);
 }
 
 message CoordinateRequest {
-    int32 x = 1;
-    int32 y = 2;
+    double x = 1;
+    double y = 2;
+    google.protobuf.Timestamp t = 3;
 }
 
 message CoordinateResponse {
