@@ -12,7 +12,7 @@
     "ui:build": "vue-tsc -p ui --noEmit && vite build",
     "ui:build:electron": "vue-tsc -p ui --noEmit && cross-env ELECTRON=true vite build",
     "ui:preview": "vite preview",
-    "bg:build": "tsc -p bg && cp server-dev.html dist/bg",
+    "bg:build": "tsc -p bg && cp server-dev dist/bg/server-dev.html",
     "start": "tsc --outDir server && node server/src/server",
     "proto": "node scripts/protos ",
     "electron": "npm run bg:build && wait-on tcp:3000 && cross-env IS_DEV=true electron .",
