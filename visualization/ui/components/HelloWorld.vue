@@ -6,7 +6,7 @@ defineProps<{ msg: string }>();
 const count = ref(0);
 const click = async () => {
   //console.log()
-  count.value = await send('make-factorial', { num: 4 });
+  count.value = await send('echo', { num: 4 });
 };
 </script>
 

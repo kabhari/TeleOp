@@ -27,7 +27,7 @@ function createWindow(socketName) {
     clientWin.loadURL(
         isDev
             ? 'http://localhost:3000'
-            : `file://${path.join(__dirname, '../dist/fe/index.html')}`
+            : `file://${path.join(__dirname, '../dist/ui/index.html')}`
     );
 
     clientWin.webContents.on('did-finish-load', () => {
@@ -68,7 +68,7 @@ function createBackgroundWindow(socketName) {
   }
 
   function createBackgroundProcess(socketName) {
-    serverProcess = fork(path.join(__dirname, '../dist/bg/server.js'), [
+    serverProcess = fork(path.join(__dirname, '../dist/bg/Index.js'), [
       '--subprocess',
       app.getVersion(),
       socketName
