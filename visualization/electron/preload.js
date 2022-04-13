@@ -30,14 +30,14 @@ window.getServerSocket = () => {
   return socketPromise
 }
 
-ipcRenderer.on('set-socket', (event, { name }) => {
-  resolveSocketPromise(name)
+ipcRenderer.on('set-socket', (event, { socketName }) => {
+  resolveSocketPromise(socketName)
 })
 
-window.ipcConnect = (id, func) => {
+window.ipcConnect = (socketName, callBack) => {
   ipc.config.silent = true
-  ipc.connectTo(id, () => {
-    func(ipc.of[id])
+  ipc.connectTo(socketName, () => {
+    callBack(ipc.of[socketName])
   })
 }
 window.uuid = uuid

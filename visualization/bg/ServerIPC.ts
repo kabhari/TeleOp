@@ -1,6 +1,6 @@
 import ipc from "node-ipc";
 import ServicesIPC from "./ServicesIPC";
-
+import { IPCResponseType } from "../shared/Enums";
 class ServerIPC {
   services: ServicesIPC;
   IPC_CHANNEL: string;
@@ -20,14 +20,14 @@ class ServerIPC {
     console.log("IPC Server Started");
   }
 
-  async IPCMiddleWare(data: any, socket: any) {
-    const { id, name, args } = JSON.parse(data);
+  async IPCMiddleWare(dataRaw: any, socket: any) {
+    const { id, route, data } = JSON.parse(dataRaw);
 
     // Get the corresponding service from the services object, run it and return the results
-    const method = this.services[name as keyof ServicesIPC];
+    const method = this.services[route as keyof ServicesIPC];
     if (typeof method === "function") {
       try {
-        const result = await method(args);
+        const result = await method(data);
         // 200
         this.emit(socket, {
           type: IPCResponseType.reply,
@@ -57,17 +57,12 @@ class ServerIPC {
     ipc.server.emit(socket, this.IPC_CHANNEL, JSON.stringify(content));
   }
 
-  send(name: string, args: any) {
+  push(name: string, args: any) {
     ipc.server.broadcast(
-      "message",
-      JSON.stringify({ type: "push", name, args })
+      this.IPC_CHANNEL,
+      JSON.stringify({ type: IPCResponseType.push, name, args })
     );
   }
-}
-
-enum IPCResponseType {
-  error = "error",
-  reply = "reply",
 }
 
 export default ServerIPC;

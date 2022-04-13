@@ -32,7 +32,7 @@ function createWindow(socketName) {
 
     clientWin.webContents.on('did-finish-load', () => {
       clientWin.webContents.send('set-socket', {
-          name: socketName
+          socketName: socketName
         })
       })
 
@@ -58,7 +58,7 @@ function createBackgroundWindow(socketName) {
     win.loadURL(`file://${path.join(__dirname, '../dist/bg/server-dev.html')}`)
   
     win.webContents.on('did-finish-load', () => {
-      win.webContents.send('set-socket', { name: socketName })
+      win.webContents.send('set-socket', { socketName: socketName })
     })
   
     win.webContents.openDevTools();

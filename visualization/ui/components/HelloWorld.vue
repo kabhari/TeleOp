@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { getCurrentInstance, ref } from "vue";
-import { send } from "./client-ipc.js"
 defineProps<{ msg: string }>();
 
 const count = ref(0);
 const click = async () => {
   //console.log()
-  count.value = await send('echo', { num: 4 });
+  await window.clientRPC.send('echo', { num: count.value });
+  count.value++; 
 };
 </script>
 
