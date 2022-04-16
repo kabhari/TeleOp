@@ -1,24 +1,71 @@
 {
   "name": "visualization",
+  "author": "Mohammad Owlia & Kamyar Abhari",
   "version": "0.0.1",
+  "main": "electron/electron.js",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "format": "prettier .  --write"
+    "format": "prettier .  --write",
+    "ui:dev": "vite",
+    "ui:build": "vue-tsc -p ui --noEmit && vite build",
+    "ui:build:electron": "vue-tsc -p ui --noEmit && cross-env ELECTRON=true vite build",
+    "ui:preview": "vite preview",
+    "bg:build": "tsc -p bg && cp server-dev dist/bg/server-dev.html",
+    "start": "tsc --outDir server && node server/src/server",
+    "proto": "node scripts/protos ",
+    "electron": "npm run bg:build && wait-on tcp:3000 && cross-env IS_DEV=true electron .",
+    "electron:pack": "electron-builder --dir",
+    "electron:dev": "concurrently -k \"cross-env BROWSER=none npm run ui:dev\" \"npm run electron\"",
+    "electron:builder": "electron-builder",
+    "app:build": "npm run ui:build:electron && npm run electron:builder"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.4.4",
+    "node-ipc": "^9.1.1",
+    "uuid": "^8.3.2",
     "vue": "^3.2.25"
   },
   "devDependencies": {
+    "@types/node-ipc": "^9.2.0",
+    "@types/uuid": "^8.3.4",
     "@vitejs/plugin-vue": "^2.0.0",
     "autoprefixer": "^10.4.2",
-    "electron": "^16.0.8",
+    "concurrently": "^7.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^16.1.0",
+    "electron-builder": "^22.14.13",
+    "grpc-tools": "^1.11.2",
     "postcss": "^8.4.6",
     "prettier": "2.5.1",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4",
     "tailwindcss": "^3.0.22",
+    "ts-proto": "^1.90.0",
     "typescript": "^4.4.4",
     "vite": "^2.7.2",
-    "vue-tsc": "^0.29.8"
+    "vue-tsc": "^0.29.8",
+    "wait-on": "^6.0.1"
+  },
+  "build": {
+    "appId": "com.moka.visualization",
+    "productName": "Visualization",
+    "copyright": "Copyright © 2022 Moka",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist_electron"
+    }
   }
 }
