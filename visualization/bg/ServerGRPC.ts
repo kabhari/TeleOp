@@ -10,10 +10,10 @@ export default class ServerGRPC {
     "grpc.max_send_message_length": -1,
   });
 
-  constructor(serverIPC: ServerIPC, host = "0.0.0.0", port = 50051) {
+  constructor(serverIPC: ServerIPC, host: string) {
     this.server.addService(CoordinateService, new Coordinate(serverIPC));
     this.server.bindAsync(
-      `${host}:${port}`,
+      host,
       ServerCredentials.createInsecure(),
       (err: Error | null, bindPort: number) => {
         if (err) {
@@ -23,6 +23,6 @@ export default class ServerGRPC {
         this.server.start();
       }
     );
-    console.log(`GRPC Server running at ${host}:${port}`);
+    console.log(`GRPC Server running at ${host}`);
   }
 }

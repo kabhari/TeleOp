@@ -1,6 +1,15 @@
 import ServicesIPC from "./ServicesIPC";
 import ServerIPC from "./ServerIPC";
 import ServerGRPC from "./ServerGRPC";
+import "dotenv/config";
+
+let host: string;
+if (process.env["GRPC_HOST"]) {
+  host = process.env["GRPC_HOST"];
+} else {
+  console.error("Please check the .env file", process.env);
+  process.exit(1);
+}
 
 let isDev, version;
 let serverIPC;
@@ -15,7 +24,7 @@ if (process.argv[2] === "--subprocess") {
 
   let socketName = process.argv[4];
   serverIPC = new ServerIPC(IPC_CHANNEL, socketName, servicesIPC);
-  serverGRPC = new ServerGRPC(serverIPC);
+  serverGRPC = new ServerGRPC(serverIPC, host);
 } else {
   let { ipcRenderer } = require("electron");
   isDev = true;
@@ -23,7 +32,7 @@ if (process.argv[2] === "--subprocess") {
   // If this is dev, we need to wait for socket to be ready
   ipcRenderer.on("set-socket", (event: any, { socketName }: any) => {
     serverIPC = new ServerIPC(IPC_CHANNEL, socketName, servicesIPC);
-    serverGRPC = new ServerGRPC(serverIPC);
+    serverGRPC = new ServerGRPC(serverIPC, host);
   });
 }
 

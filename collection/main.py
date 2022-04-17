@@ -3,11 +3,15 @@ import random
 import math
 import logging
 import datetime
+import os
 
 import proto.coordinate_pb2 as coordinate_pb2
 import proto.coordinate_pb2_grpc as coordinate_pb2_grpc
 from google.protobuf.timestamp_pb2 import Timestamp
 
+from dotenv import load_dotenv
+load_dotenv()  # take environment variables from .env.
+GRPC_HOST=os.getenv('GRPC_HOST')
 
 def generate_random_pnt_circle(radius, center_x, center_y):
     """This function generates a random point inside a circle
@@ -66,7 +70,7 @@ def send_message(stub):
 
 def run():
     """Create  the client"""
-    with grpc.insecure_channel("localhost:50051") as channel:
+    with grpc.insecure_channel(GRPC_HOST) as channel:
         stub = coordinate_pb2_grpc.CoordinateStub(channel)
         send_message(stub)
 
