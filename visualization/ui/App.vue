@@ -1,13 +1,22 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from "./components/HelloWorld.vue";
+import Canvas from "./components/Canvas.vue";
 </script>
 
 <template>
-  <h1 class="text-3xl font-bold underline">Hello world!</h1>
-  <img alt="Vue logo" class="m-auto" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
+  <div class="flex flex-col h-full">
+    <div id="body" class="grow flex justify-center items-center gap-8">
+      <div id="toolbar_left">left</div>
+      <div id="body_main" class=""><Canvas /></div>
+      <div id="toolbar_right">right</div>
+    </div>
+    <div id="footer">
+      <h1 class="m-16 text-center text-2xl">
+        Press on number 1 to begin calibration
+      </h1>
+    </div>
+  </div>
 </template>
 
 <style>
@@ -15,8 +24,7 @@ import HelloWorld from "./components/HelloWorld.vue";
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  @apply h-screen;
 }
 </style>
