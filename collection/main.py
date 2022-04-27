@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 GRPC_HOST=os.getenv('GRPC_HOST')
 
-def generate_random_pnt_circle(radius, center_x, center_y):
+def generate_random_pnt_circle(radius, center_x, center_y, alpha):
     """This function generates a random point inside a circle
 
     Args:
@@ -24,10 +24,8 @@ def generate_random_pnt_circle(radius, center_x, center_y):
     Returns:
         int, int: a random point inside a circle
     """
-    alpha = 2 * math.pi * random.random()  # random angle
-    r = radius * math.sqrt(random.random())  # random radius
     # calculate and return coordinates
-    return r * math.cos(alpha) + center_x, r * math.sin(alpha) + center_y
+    return radius * math.cos(alpha) + center_x, radius * math.sin(alpha) + center_y
 
 
 def generate_messages():
@@ -39,14 +37,19 @@ def generate_messages():
     """
     # We are making use of protobuf's Timestamp() to transfer timestamps
     timestamp = Timestamp()
+
+    alpha=0
+    r=0
     # Inifinite loop to send data from stub (client) to the server
     while True:
+        alpha += 0.001
+        r += 0.0001
         # stamp the data with current date + time
         timestamp.FromDatetime(datetime.datetime.now())
         # construct the message
         msg = coordinate_pb2.CoordinateRequest(
-            x=generate_random_pnt_circle(10, 0, 0)[0],
-            y=generate_random_pnt_circle(10, 0, 0)[1],
+            x=generate_random_pnt_circle(10* math.sin(r), 0, 0, alpha)[0],
+            y=generate_random_pnt_circle(10 * math.sin(r), 0, 0, alpha)[1],
             t=timestamp,
         )
         log.info(
