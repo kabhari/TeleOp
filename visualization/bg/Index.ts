@@ -1,6 +1,7 @@
 import ServicesIPC from "./ServicesIPC";
 import ServerIPC from "./ServerIPC";
 import ServerGRPC from "./ServerGRPC";
+import { connect } from 'mongoose';
 import "dotenv/config";
 
 let host: string;
@@ -37,3 +38,14 @@ if (process.argv[2] === "--subprocess") {
 }
 
 console.log("Node Process Initiated, is Dev?", isDev);
+
+/* database */
+run_db()
+  .then(res => console.info("Mongo is connected!"))
+  .catch(err => console.log(err));
+
+async function run_db() {
+  //Set up default mongoose connection
+  var mongoDB = 'mongodb://127.0.0.1/cathpilot';
+  await connect(mongoDB);
+}

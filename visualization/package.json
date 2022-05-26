@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.4.4",
+    "mongoose": "^6.3.4",
     "node-ipc": "^9.1.1",
     "uuid": "^8.3.2",
     "vue": "^3.2.25"
