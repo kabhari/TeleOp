@@ -1,5 +1,4 @@
 import { Schema, model, ObjectId } from 'mongoose';
-import SessionModel from "./session.model"
 
 // 1. Create an interface representing a document in MongoDB
 export interface ISavedPoints {

@@ -9,7 +9,7 @@ export interface ICalibration {
 // 2. Create a Schema corresponding to the document interface
 const calibrationnSchema = new Schema<ICalibration>({
     calibdation_factors: { type: Schema.Types.Array, required: true },
-    session_id: { type: Schema.Types.ObjectId, required: true }
+    session_id: { type: Schema.Types.ObjectId, ref: 'SessionModel' }
 });
 
 // 3. Create a Model
