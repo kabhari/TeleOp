@@ -8,7 +8,7 @@ let host: string;
 if (process.env["GRPC_HOST"]) {
   host = process.env["GRPC_HOST"];
 } else {
-  console.error("Please check the .env file", process.env);
+  console.error("Please check the .env file to ensure it includes the GRPC host", process.env);
   process.exit(1);
 }
 
@@ -46,6 +46,12 @@ run_db()
 
 async function run_db() {
   //Set up default mongoose connection
-  var mongoDB = 'mongodb://127.0.0.1/cathpilot';
-  await connect(mongoDB);
+  let mongoDB: string;
+  if (process.env["MONGO_HOST"]) {
+    mongoDB = process.env["MONGO_HOST"];
+    await connect(mongoDB);
+  } else {
+    console.error("Please check the .env file to ensure it includes The MongoDB host", process.env);
+    process.exit(1);
+  }
 }

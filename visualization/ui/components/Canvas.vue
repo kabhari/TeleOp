@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, onMounted, onUnmounted } from "vue";
+import {  inject, ref, onMounted, onUnmounted } from "vue";
 import { ClientRPCKey } from "../symbols";
 import ClientIPC from "../ClientIPC";
 import CanvasDrawer from "./CanvasDrawer";
@@ -9,6 +9,7 @@ const clientRPC = inject(ClientRPCKey) as ClientIPC; // typed as Product or unde
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
+let coord: CoordinateRequest;
 
 onMounted(() => {
   // Register a listener for incoming coordinates
@@ -18,6 +19,7 @@ onMounted(() => {
     clientRPC.listen("coordinate", (data: CoordinateRequest) => {
       ctx.clear();
       ctx.drawCircle(10 * data.x + 250, 10 * data.y + 250, 5);
+      coord = data;
     });
   } else {
     console.error("Could not get canvas context");
@@ -27,10 +29,23 @@ onMounted(() => {
 onUnmounted(() => {
   clientRPC.unlisten("coordinate");
 });
+
+const savePoints = () => {
+  // Save the data in the database
+  console.log("(", coord.x, ", ", coord.y, ") at ", coord.t)
+}
+
 </script>
 
 <template>
+<div>
+  <div>
   <canvas ref="canvas" id="canvas" width="500" height="500" />
+</div>
+<div>
+  <button @click="savePoints">Save Points</button>
+</div>
+</div>
 </template>
 
 <style scoped>
