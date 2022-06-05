@@ -40,8 +40,12 @@ def generate_messages():
 
     alpha=0
     r=0
+    count=0
+    lastHzCalculate=datetime.datetime.now()
+
     # Inifinite loop to send data from stub (client) to the server
     while True:
+        count += 1
         alpha += 0.001
         r += 0.0001
         # stamp the data with current date + time
@@ -52,9 +56,18 @@ def generate_messages():
             y=generate_random_pnt_circle(10 * math.sin(r), 0, 0, alpha)[1],
             t=timestamp,
         )
-        log.info(
-            f"Sending ({msg.x}, {msg.y}) at {datetime.datetime.fromtimestamp(msg.t.seconds + msg.t.nanos / 1e9)}"
-        )
+
+        # Calculate the frequency of messages sent
+        if count == 1000:
+            now = datetime.datetime.now()
+            log.info(f"Outgoing GRPC rate is {round(1000/(now - lastHzCalculate).total_seconds())}Hz")
+            count = 0
+            lastHzCalculate = now
+
+
+        #log.info(
+        #    f"Sending ({msg.x}, {msg.y}) at {datetime.datetime.fromtimestamp(msg.t.seconds + msg.t.nanos / 1e9)}"
+        #)
         yield msg
 
 

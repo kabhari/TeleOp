@@ -1,3 +1,8 @@
+/* 
+  This class facilitates communication between the client (UI) and the server (BG) using the IPC protocol.
+  It is instantiated by specifying the name of the socket to connect to.
+*/
+
 import { IPCResponseType } from "../shared/enums";
 
 export default class ClientIPC {
@@ -13,6 +18,12 @@ export default class ClientIPC {
     });
   }
 
+  /**
+   * Connect to IPC server.
+   * @param {string} socketName The socket name to connect to.
+   * @param {Function} onOpen Callback once the connection is established.
+   * @returns {Promise<}
+   */
   connectSocket(socketName: string, onOpen: Function) {
     window.ipcConnect(socketName, (client) => {
       client.on("message", (rawData: string) => {
@@ -62,6 +73,12 @@ export default class ClientIPC {
     });
   }
 
+  /**
+   * Sends a message to the IPC server.
+   * @param {route} route The route to send the message to.
+   * @param {any} data The data object to send.
+   * @returns {Promise<}
+   */
   send(route: string, data: any) {
     return new Promise((resolve, reject) => {
       let id = window.uuid.v4();
@@ -75,12 +92,19 @@ export default class ClientIPC {
     });
   }
 
+  /**
+   * Listen to events from IPC server
+   * @param {string} name The name of message to listen to.
+   * @param {Function} callback The callback function.
+   * @returns {() => void} A function to unlisten to the event.
+   */
   listen(name: string, callback: Function) {
     if (!this.listeners.get(name)) {
       this.listeners.set(name, []);
     }
     this.listeners.get(name).push(callback);
 
+    // return an function to unlisten this callback
     return () => {
       let arr = this.listeners.get(name);
       this.listeners.set(
@@ -89,8 +113,17 @@ export default class ClientIPC {
       );
     };
   }
-
+  /**
+   * Unlisten to an specific events from IPC server
+   * @param {string} name The name of message to unlisten.
+   * @returns {void}
+   */
   unlisten(name: string) {
     this.listeners.set(name, []);
   }
+}
+
+// TODO find the correct type here
+export interface IpcConnect {
+  (socketName: string, callback: (args: any) => any): void;
 }

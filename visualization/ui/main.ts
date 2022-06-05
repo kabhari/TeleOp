@@ -2,8 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
 import uuid from "uuid";
-
-import ClientIPC from "./ClientIPC";
+import ClientIPC, { IpcConnect } from "./ClientIPC";
 import { ClientRPCKey } from "./symbols";
 
 const app = createApp(App);
@@ -25,9 +24,4 @@ declare global {
     uuid: typeof uuid;
     clientRPC: ClientIPC;
   }
-}
-
-// TODO find the correct type here
-interface IpcConnect {
-  (socketName: string, callback: (args: any) => any): void;
 }

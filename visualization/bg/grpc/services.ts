@@ -9,33 +9,35 @@ import {
   CoordinateService,
   CoordinateRequest,
   CoordinateResponse,
-} from "../proto/coordinate";
+} from "../../proto/coordinate";
 
-import ServerIPC from "./ServerIPC";
-import CoordinateModel from "./Data/Models/coord.model";
-import SessionModel from "./Data/Models/session.model";
+import ServerIPC from "../ipc/server";
+import CoordinateModel from "../data/models/coord.model";
+import SessionModel from "../data/models/session.model";
 
-// TODO this needs to be inside the class
-let _serverIPC: ServerIPC;
+let counter = 0;
+let lastHzCalculate = Date.now();
 
 class Coordinate implements CoordinateServer {
+  [method: string]: UntypedHandleCall;
+
   // the session variable is the model we use to save the information about session in mongo
   // refer to ./Data/Models/session.model for more
   static session: any;
+  static serverIPC: ServerIPC;
+  // TODO: above lines might have concurrency issues, needs to be investigated
 
   // we will save the session model in the constructor
   constructor(serverIPC: ServerIPC) {
-    _serverIPC = serverIPC;
+    Coordinate.serverIPC = serverIPC;
 
     // save the session & the time it's created in the database
     // the id of the session (i.e. session._id) is referenced in other collections
     Coordinate.session = new SessionModel({
-      session_started: Date.now()
+      session_started: Date.now(),
     });
     Coordinate.session.save();
   }
-
-  [method: string]: UntypedHandleCall;
 
   public receiveCoordination(
     call: ServerReadableStream<CoordinateRequest, CoordinateResponse>,
@@ -43,19 +45,30 @@ class Coordinate implements CoordinateServer {
   ): void {
     call
       .on("data", (req: CoordinateRequest) => {
-        console.debug("Received CoordinateRequest:", req.x, req.y);
+        // Calculate the Hz
+        counter += 1;
+        if (counter == 1000) {
+          const now = Date.now();
+          console.log(
+            `Incoming GRPC rate: ${Math.round(
+              (1000 * 1000) / (now - lastHzCalculate)
+            )}Hz`
+          );
+          lastHzCalculate = now;
+          counter = 0;
+        }
 
         // Save the data in the database
         const coordinate = new CoordinateModel({
           x_coordinate: req.x,
           y_coordinate: req.y,
           t_coordinate: Date.now(),
-          session_id: Coordinate.session._id
+          session_id: Coordinate.session._id,
         });
         coordinate.save();
 
         // Forward the data over the IPC channel
-        _serverIPC.push("coordinate", req);
+        Coordinate.serverIPC.push("coordinate", req);
       })
       .on("end", () => {
         // save the end time in the session collection

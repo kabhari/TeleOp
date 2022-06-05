@@ -4,12 +4,9 @@ defineProps<{ msg: string }>();
 
 const count = ref(0);
 const click = async () => {
-  //console.log()
-  await window.clientRPC.send('echo', { num: count.value });
-  count.value++; 
+  count.value++;
 };
 </script>
-
 
 <template>
   <h1>{{ msg }}</h1>
@@ -27,7 +24,9 @@ const click = async () => {
   </p>
 
   <p>
-    <a href="https://vitejs.dev/guide/features.html" target="_blank">Vite Docs</a>
+    <a href="https://vitejs.dev/guide/features.html" target="_blank"
+      >Vite Docs</a
+    >
     |
     <a href="https://v3.vuejs.org/" target="_blank">Vue 3 Docs</a>
   </p>

@@ -1,7 +1,7 @@
 import "source-map-support/register";
 import { Server, ServerCredentials } from "@grpc/grpc-js";
-import { Coordinate, CoordinateService } from "./ServicesGRPC";
-import ServerIPC from "./ServerIPC";
+import { Coordinate, CoordinateService } from "./services";
+import ServerIPC from "../ipc/server";
 
 export default class ServerGRPC {
   // Do not use @grpc/proto-loader

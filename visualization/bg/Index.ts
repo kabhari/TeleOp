@@ -1,14 +1,20 @@
-import ServicesIPC from "./ServicesIPC";
-import ServerIPC from "./ServerIPC";
-import ServerGRPC from "./ServerGRPC";
-import { connect } from 'mongoose';
+import ServicesIPC from "./ipc/services";
+import ServerIPC from "./ipc/Server";
+import ServerGRPC from "./grpc/server";
+import { connect } from "mongoose";
 import "dotenv/config";
 
 let host: string;
-if (process.env["GRPC_HOST"]) {
+let mongoDB: string;
+
+if (process.env["GRPC_HOST"] && process.env["MONGO_HOST"]) {
   host = process.env["GRPC_HOST"];
+  mongoDB = process.env["MONGO_HOST"];
 } else {
-  console.error("Please check the .env file to ensure it includes the GRPC host", process.env);
+  console.error(
+    "Please check the .env file to ensure it includes the GRPC and MongoDB host",
+    process.env
+  );
   process.exit(1);
 }
 
@@ -37,21 +43,8 @@ if (process.argv[2] === "--subprocess") {
   });
 }
 
+connect(mongoDB).catch((err: any) => {
+  console.error("something went wrong when connecting to Database", err);
+});
+
 console.log("Node Process Initiated, is Dev?", isDev);
-
-/* database */
-run_db()
-  .then(res => console.info("Mongo is connected!"))
-  .catch(err => console.log(err));
-
-async function run_db() {
-  //Set up default mongoose connection
-  let mongoDB: string;
-  if (process.env["MONGO_HOST"]) {
-    mongoDB = process.env["MONGO_HOST"];
-    await connect(mongoDB);
-  } else {
-    console.error("Please check the .env file to ensure it includes The MongoDB host", process.env);
-    process.exit(1);
-  }
-}
