@@ -23,7 +23,7 @@ class Coordinate implements CoordinateServer {
 
   // the session variable is the model we use to save the information about session in mongo
   // refer to ./Data/Models/session.model for more
-  static session: any;
+  protected static session: any;
   static serverIPC: ServerIPC;
   // TODO: above lines might have concurrency issues, needs to be investigated
 
@@ -36,7 +36,7 @@ class Coordinate implements CoordinateServer {
     Coordinate.session = new SessionModel({
       session_started: Date.now(),
     });
-    Coordinate.session.save();
+    //Coordinate.session.save();
   }
 
   public receiveCoordination(
