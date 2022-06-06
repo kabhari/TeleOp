@@ -35,19 +35,12 @@ onUnmounted(() => {
   coordinateUnlisten();
 });
 
-const savePoints = () => {
-  // Save the data in the database
-  console.log("(", coord.x, ", ", coord.y, ") at ", coord.t);
-};
 </script>
 
 <template>
   <div>
     <div>
       <canvas ref="canvas" id="canvas" width="500" height="500" />
-    </div>
-    <div>
-      <button @click="savePoints">Save Points</button>
     </div>
   </div>
 </template>
