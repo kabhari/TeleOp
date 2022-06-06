@@ -17,6 +17,7 @@ onMounted(() => {
   const ctxBase = canvas.value?.getContext("2d");
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
+    ctx.clear();
     coordinateUnlisten = clientRPC.listen(
       "coordinate",
       (data: CoordinateRequest) => {
@@ -34,7 +35,6 @@ onUnmounted(() => {
   // Unregister the listener for incoming coordinates
   coordinateUnlisten();
 });
-
 </script>
 
 <template>
