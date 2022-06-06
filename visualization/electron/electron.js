@@ -13,14 +13,15 @@ let serverProcess
 function createWindow(socketName) {
     // Create the browser window.
     clientWin = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1280,
+        height: 720,
         webPreferences: {
             preload: path.join(__dirname, '/preload.js'),
             nodeIntegration: true,
             contextIsolation: false //TODO we need to enable this https://www.electronjs.org/docs/latest/tutorial/context-isolation
         },
     });
+    clientWin.maximize();
 
     // and load the index.html of the app.
     // win.loadFile("index.html");

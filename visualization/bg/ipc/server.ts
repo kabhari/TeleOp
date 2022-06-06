@@ -1,6 +1,6 @@
 import ipc from "node-ipc";
-import ServicesIPC from "./ServicesIPC";
-import { IPCResponseType } from "../shared/Enums";
+import ServicesIPC from "./services";
+import { IPCResponseType } from "../../shared/Enums";
 class ServerIPC {
   services: ServicesIPC;
   IPC_CHANNEL: string;

@@ -2,12 +2,19 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
 import uuid from "uuid";
-import ClientRPC from "./ClientIPC";
-createApp(App).mount("#app");
+import ClientIPC, { IpcConnect } from "./ClientIPC";
+import { ClientRPCKey } from "./symbols";
+
+const app = createApp(App);
 
 // Setup the socket info
 const socketName = await window.getServerSocket();
-window.clientRPC = new ClientRPC(socketName);
+// Instantiate Client IPC
+const clientRPC = new ClientIPC(socketName);
+// Provide the Client IPC to all components in the app as an injectable
+app.provide(ClientRPCKey, clientRPC);
+
+app.mount("#app");
 
 // extend window in global scope to include getting the socket
 declare global {
@@ -15,15 +22,6 @@ declare global {
     getServerSocket: any;
     ipcConnect: IpcConnect;
     uuid: typeof uuid;
-    clientRPC: ClientRPC;
+    clientRPC: ClientIPC;
   }
 }
-
-// TODO find the correct type here
-interface IpcConnect {
-  (socketName: string, callback: (args: any) => any): void;
-}
-
-window.clientRPC.listen("coordinate", (data: any) =>
-  console.debug("coordinate", data)
-);
