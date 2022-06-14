@@ -2,12 +2,13 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import Canvas from "./components/Canvas.vue";
+import PanelLeft from "./components/PanelLeft.vue";
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <div id="body" class="grow flex justify-center items-center gap-8">
-      <div id="toolbar_left">left</div>
+      <div id="toolbar_left"><PanelLeft /></div>
       <div id="body_main" class=""><Canvas /></div>
       <div id="toolbar_right">right</div>
     </div>

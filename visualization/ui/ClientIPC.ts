@@ -1,3 +1,4 @@
+import { IServicesIPC } from "./../shared/interfaces";
 /* 
   This class facilitates communication between the client (UI) and the server (BG) using the IPC protocol.
   It is instantiated by specifying the name of the socket to connect to.
@@ -79,7 +80,7 @@ export default class ClientIPC {
    * @param {any} data The data object to send.
    * @returns {Promise<}
    */
-  send(route: string, data: any) {
+  send(route: keyof IServicesIPC, data?: any) {
     return new Promise((resolve, reject) => {
       let id = window.uuid.v4();
       this.replyHandlers.set(id, { resolve, reject });
