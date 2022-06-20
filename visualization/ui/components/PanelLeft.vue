@@ -1,23 +1,12 @@
 <script setup lang="ts">
 import IconAnnotate from "../assets/icons/annotate.svg";
 import IconRecalibrate from "../assets/icons/recalibrate.svg";
-import { ClientRPCKey } from "../symbols";
-import { inject } from "vue";
-import ClientIPC from "../ClientIPC";
-
-const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
-
-function annotate() {
-  clientRPC.send("annotate").then(() => {
-    console.log("Annotate command sent");
-  });
-}
 </script>
 
 <template>
   <div class="flex flex-col flex-grow border-r border-gray-200 pt-5 pb-4 w-40">
     <div class="mt-5 flex-grow flex flex-col">
-      <a href="#" class="panel-item" @click="annotate()">
+      <a href="#" class="panel-item" @click="$emit('annotate')">
         <IconAnnotate />
         Annotate
       </a>

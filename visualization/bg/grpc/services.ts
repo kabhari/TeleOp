@@ -1,3 +1,4 @@
+import { ISession } from "./../data/models/session.model";
 import {
   sendUnaryData,
   ServerReadableStream,
@@ -12,8 +13,8 @@ import {
 } from "../../proto/coordinate";
 
 import ServerIPC from "../ipc/server";
-import CoordinateModel from "../data/models/coord.model";
-import SessionModel from "../data/models/session.model";
+import CoordinateModel, { ICoordinate } from "../data/models/coord.model";
+import AppContext from "../appContext";
 
 let counter = 0;
 let lastHzCalculate = Date.now();
@@ -23,20 +24,14 @@ class Coordinate implements CoordinateServer {
 
   // the session variable is the model we use to save the information about session in mongo
   // refer to ./Data/Models/session.model for more
-  protected static session: any;
+  static appContext: AppContext;
   static serverIPC: ServerIPC;
   // TODO: above lines might have concurrency issues, needs to be investigated
 
   // we will save the session model in the constructor
   constructor(serverIPC: ServerIPC) {
     Coordinate.serverIPC = serverIPC;
-
-    // save the session & the time it's created in the database
-    // the id of the session (i.e. session._id) is referenced in other collections
-    Coordinate.session = new SessionModel({
-      session_started: Date.now(),
-    });
-    //Coordinate.session.save();
+    Coordinate.appContext = AppContext.getInstance();
   }
 
   public receiveCoordination(
@@ -62,20 +57,21 @@ class Coordinate implements CoordinateServer {
         const coordinate = new CoordinateModel({
           x_coordinate: req.x,
           y_coordinate: req.y,
-          t_coordinate: Date.now(),
-          session_id: Coordinate.session._id,
-        });
+          t_coordinate: new Date(),
+          session_id: Coordinate.appContext.session._id,
+        } as ICoordinate);
         coordinate.save();
 
         // Forward the data over the IPC channel
         Coordinate.serverIPC.push("coordinate", req);
       })
       .on("end", () => {
+        // TODO we need to refine this, save the session end etc.
         // save the end time in the session collection
-        Coordinate.session.session_ended = Date.now();
-        Coordinate.session.save();
+        Coordinate.appContext.session.session_ended = Date;
+        //Coordinate.appContext.session.save();
 
-        callback(null, { message: "got the stream" } as CoordinateResponse);
+        //callback(null, { message: "got the stream" } as CoordinateResponse);
       })
       .on("error", (err: Error) => {
         console.error("Something went wrong", err.message);
