@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { inject, ref, onMounted, onUnmounted } from "vue";
-import { ClientRPCKey } from "../symbols";
-import ClientIPC from "../ClientIPC";
-import CanvasDrawer from "./CanvasDrawer";
 import { CoordinateRequest } from "../../proto/coordinate";
+import { ref, onMounted } from "vue";
+import CanvasDrawer from "./CanvasDrawer";
 
-const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
+const props = defineProps<{ data: CoordinateRequest }>();
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
-let coord: CoordinateRequest;
-let coordinateUnlisten: () => void;
+const updateRate = 1000 / 50; /* 50Hz */
 
 onMounted(() => {
   // Register a listener for incoming coordinates
@@ -18,25 +15,15 @@ onMounted(() => {
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
-    coordinateUnlisten = clientRPC.listen(
-      "coordinate",
-      (data: CoordinateRequest) => {
-        ctx.clear();
-        ctx.drawCircle(10 * data.x + 250, 10 * data.y + 250, 5);
-        coord = data;
-      }
-    );
+    setInterval(() => {
+      ctx.clear();
+      ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5);
+    }, updateRate);
   } else {
     console.error("Could not get canvas context");
   }
 });
-
-onUnmounted(() => {
-  // Unregister the listener for incoming coordinates
-  coordinateUnlisten();
-});
 </script>
-
 <template>
   <div>
     <div>
