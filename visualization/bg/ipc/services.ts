@@ -10,10 +10,12 @@ export default class ServicesIPC implements IServicesIPC {
   constructor() {
     ServicesIPC.appContext = AppContext.getInstance();
   }
-  async echo(message: any) {
+
+  echo(message: any) {
     console.log("echo", message);
     return message;
   }
+
   async annotate(savedPoint: ISavedPoint) {
     // Add time and session ID to the saved point
     const savedPointModel: ISavedPointExtended = {
@@ -24,5 +26,11 @@ export default class ServicesIPC implements IServicesIPC {
     console.log("annotate", savedPointModel);
     const coordinate = new SavedPointsModel(savedPointModel);
     await coordinate.save();
+  }
+
+  // return all the annotated points that belongs to current session
+  async view() {
+    const session_id = ServicesIPC.appContext.session._id;
+    return await SavedPointsModel.find({ session_id: session_id });
   }
 }

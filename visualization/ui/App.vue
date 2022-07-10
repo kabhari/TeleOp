@@ -44,14 +44,22 @@ function annotate() {
   clientRPC.send("annotate", savedPoint).then(() => {
     console.log("Annotate command sent");
   });
+
   // TODO we might need to wait for a reply to confirm the point is actually saved!
 }
+
+function view() {
+    clientRPC.send("view").then((res) => {
+    console.log(res);
+  })
+}
+
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <div id="body" class="grow flex justify-center items-center gap-8">
-      <div id="toolbar_left"><PanelLeft @annotate="annotate" /></div>
+      <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" /></div>
       <div id="body_main" class=""><Canvas :data="dataCanvas" /></div>
       <div id="toolbar_right">right</div>
     </div>
