@@ -3,7 +3,7 @@ import { CoordinateRequest } from "../../proto/coordinate";
 import { ref, onMounted } from "vue";
 import CanvasDrawer from "./CanvasDrawer";
 
-const props = defineProps<{ data: CoordinateRequest }>();
+const props = defineProps<{ data: CoordinateRequest, annon: Array<CoordinateRequest> }>();
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -17,7 +17,12 @@ onMounted(() => {
     ctx.clear();
     setInterval(() => {
       ctx.clear();
-      ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5);
+      ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
+      if(props.annon){
+        for(let a of props.annon){
+          ctx.drawCircle(10 * a.x + 250, 10 * a.y + 250, 5, "red")
+        }
+      }
     }, updateRate);
   } else {
     console.error("Could not get canvas context");

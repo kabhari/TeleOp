@@ -7,11 +7,14 @@ export default class CanvasDrawer {
     this.ctx = ctx;
   }
 
-  drawCircle(x: number, y: number, radius: number) {
+  drawCircle(x: number, y: number, radius: number, color?: string) {
     // draw the grid in the background
     this.ctx.moveTo(x, y);
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    if (color) {
+      this.ctx.fillStyle = color;
+    }
     this.ctx.fill();
     this.ctx.closePath();
   }
