@@ -12,6 +12,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 GRPC_HOST=os.getenv('GRPC_HOST')
+MAX_DATA_RATE = 3000 # In Hz
 
 def generate_random_pnt_circle(radius, center_x, center_y, alpha):
     """This function generates a random point inside a circle
@@ -42,6 +43,7 @@ def generate_messages():
     r=0
     count=0
     lastHzCalculate=datetime.datetime.now()
+    lastTime=datetime.datetime.now()
 
     # Inifinite loop to send data from stub (client) to the server
     while True:
@@ -57,10 +59,16 @@ def generate_messages():
             t=timestamp,
         )
 
-        # Calculate the frequency of messages sent
-        if count == 1000:
+        # Throttle the data sent to 
+        while (datetime.datetime.now() - lastTime) < datetime.timedelta(microseconds=1000000 / MAX_DATA_RATE):
+            pass
+
+        lastTime=datetime.datetime.now()
+
+        # Display the Actual Data rate every second
+        if count == MAX_DATA_RATE:
             now = datetime.datetime.now()
-            log.info(f"Outgoing GRPC rate is {round(1000/(now - lastHzCalculate).total_seconds())}Hz")
+            log.info(f"Outgoing GRPC rate is {round( MAX_DATA_RATE/(now - lastHzCalculate).total_seconds())}Hz")
             count = 0
             lastHzCalculate = now
 
