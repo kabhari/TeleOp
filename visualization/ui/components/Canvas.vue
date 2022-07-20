@@ -20,7 +20,7 @@ onMounted(() => {
       ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
       if(props.annon){
         for(let a of props.annon){
-          ctx.drawCircle(10 * a.x + 250, 10 * a.y + 250, 5, "red")
+          ctx.drawCircle(10 * a.x + 250, 10 * a.y + 250, 5, "red", "test_label");
         }
       }
     }, updateRate);

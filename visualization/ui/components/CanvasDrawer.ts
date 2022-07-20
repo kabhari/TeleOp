@@ -7,7 +7,7 @@ export default class CanvasDrawer {
     this.ctx = ctx;
   }
 
-  drawCircle(x: number, y: number, radius: number, color?: string) {
+  drawCircle(x: number, y: number, radius: number, color?: string, label?: string) {
     // draw the grid in the background
     this.ctx.moveTo(x, y);
     this.ctx.beginPath();
@@ -17,6 +17,11 @@ export default class CanvasDrawer {
     }
     this.ctx.fill();
     this.ctx.closePath();
+    if (label) {
+      this.ctx.fillStyle = "black";
+      this.ctx.font = "12px Arial";
+      this.ctx.fillText(label, x + 10, y + 10);
+    }
   }
 
   drawGrid(_padding: number, _height: number, _width: number) {
