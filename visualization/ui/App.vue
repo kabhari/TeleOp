@@ -16,6 +16,8 @@ const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC insta
 const canvas = ref<HTMLCanvasElement | null>(null);
 let coordinateUnlisten: () => void;
 let dataCanvas = {} as CoordinateRequest;
+let annotatedCanvas = [] as Array<CoordinateRequest>;
+
 onMounted(() => {
   // Register a listener for incoming coordinates
   coordinateUnlisten = clientRPC.listen(
@@ -44,15 +46,28 @@ function annotate() {
   clientRPC.send("annotate", savedPoint).then(() => {
     console.log("Annotate command sent");
   });
+
   // TODO we might need to wait for a reply to confirm the point is actually saved!
 }
+
+function view() {
+    clientRPC.send("view").then((res: any) => {
+      // annotatedCanvas = [];
+      for (let points in res){
+        let x : number = res[points].saved_x;
+        let y: number = res[points].saved_y;
+        annotatedCanvas.push({x, y})
+      }
+  })
+};
+
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <div id="body" class="grow flex justify-center items-center gap-8">
-      <div id="toolbar_left"><PanelLeft @annotate="annotate" /></div>
-      <div id="body_main" class=""><Canvas :data="dataCanvas" /></div>
+      <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" /></div>
+      <div id="body_main" class=""><Canvas :data="dataCanvas" :annon="annotatedCanvas" /></div>
       <div id="toolbar_right">right</div>
     </div>
     <div id="footer">

@@ -15,6 +15,11 @@ import IconRecalibrate from "../assets/icons/recalibrate.svg";
         <IconRecalibrate />
         Recalibrate
       </a>
+
+      <a href="#" class="panel-item" @click="$emit('view')">
+        <IconAnnotate />
+        View Annotations
+      </a>
     </div>
   </div>
 </template>
