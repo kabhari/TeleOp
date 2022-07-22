@@ -17,6 +17,7 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 let coordinateUnlisten: () => void;
 let dataCanvas = {} as CoordinateRequest;
 let annotatedCanvas = [] as Array<CoordinateRequest>;
+let isAnon = true;
 
 onMounted(() => {
   // Register a listener for incoming coordinates
@@ -51,14 +52,21 @@ function annotate() {
 }
 
 function view() {
+  if (isAnon) {
     clientRPC.send("view").then((res: any) => {
-      // annotatedCanvas = [];
-      for (let points in res){
-        let x : number = res[points].saved_x;
+      for (let points in res) {
+        let x: number = res[points].saved_x;
         let y: number = res[points].saved_y;
-        annotatedCanvas.push({x, y})
+        annotatedCanvas.push({ x, y });
       }
-  })
+    });
+  } else {
+    // For some reason annotateCanvas = [] doesn't empty the array so had to use pop() instead
+    while (annotatedCanvas.length) {
+      annotatedCanvas.pop();
+    }
+  }
+  isAnon = !isAnon;
 };
 
 </script>

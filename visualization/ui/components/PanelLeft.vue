@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import IconAnnotate from "../assets/icons/annotate.svg";
 import IconRecalibrate from "../assets/icons/recalibrate.svg";
+import { ref } from "vue";
+
+let toggle = ref<boolean>(true);
+
 </script>
 
 <template>
@@ -16,9 +20,9 @@ import IconRecalibrate from "../assets/icons/recalibrate.svg";
         Recalibrate
       </a>
 
-      <a href="#" class="panel-item" @click="$emit('view')">
+      <a href="#" class="panel-item" @click="$emit('view'); toggle = !toggle">
         <IconAnnotate />
-        View Annotations
+        {{toggle ? 'View Annotations' : 'Hide Annotations'}}
       </a>
     </div>
   </div>
