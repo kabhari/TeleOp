@@ -14,10 +14,12 @@ const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC insta
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
+let annotationLabel = ref<String>("");
 let coordinateUnlisten: () => void;
 let dataCanvas = {} as CoordinateRequest;
 let annotatedCanvas = [] as Array<CoordinateRequest>;
 let isAnon = true;
+let labelCount = 0;
 
 onMounted(() => {
   // Register a listener for incoming coordinates
@@ -41,7 +43,9 @@ function annotate() {
     name: "test_name",
     saved_x: dataCanvas.x,
     saved_y: dataCanvas.y,
-    label: "test_label",
+    label: annotationLabel.value != "" && annotationLabel.value !== undefined
+      ? annotationLabel.value :
+      "R" + (labelCount++).toString(),
   };
 
   clientRPC.send("annotate", savedPoint).then(() => {
@@ -57,7 +61,8 @@ function view() {
       for (let points in res) {
         let x: number = res[points].saved_x;
         let y: number = res[points].saved_y;
-        annotatedCanvas.push({ x, y });
+        let label: string = res[points].label;
+        annotatedCanvas.push({ x, y, label });
       }
     });
   } else {
@@ -77,6 +82,11 @@ function view() {
       <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" /></div>
       <div id="body_main" class=""><Canvas :data="dataCanvas" :annon="annotatedCanvas" /></div>
       <div id="toolbar_right">right</div>
+    </div>
+    <div>
+      <h1 class="text-center text-xl">
+        <input type="text" v-model="annotationLabel" placeholder="Enter annotation label" />
+      </h1>
     </div>
     <div id="footer">
       <h1 class="m-16 text-center text-2xl">
