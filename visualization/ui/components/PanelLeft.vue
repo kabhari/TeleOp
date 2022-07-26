@@ -15,14 +15,14 @@ let toggle = ref<boolean>(true);
         Annotate
       </a>
 
-      <a href="#" class="panel-item">
+      <a href="#" class="panel-item" @click="$emit('recalibrate')">
         <IconRecalibrate />
         Recalibrate
       </a>
 
       <a href="#" class="panel-item" @click="$emit('view'); toggle = !toggle">
         <IconAnnotate />
-        {{toggle ? 'View Annotations' : 'Hide Annotations'}}
+        {{ toggle ? 'View Annotations' : 'Hide Annotations' }}
       </a>
     </div>
   </div>

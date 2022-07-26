@@ -3,7 +3,7 @@ import { CoordinateRequest } from "../../proto/coordinate";
 import { ref, onMounted } from "vue";
 import CanvasDrawer from "./CanvasDrawer";
 
-const props = defineProps<{ data: CoordinateRequest, annon: Array<CoordinateRequest> }>();
+const props = defineProps<{ data: CoordinateRequest, annon: Array<CoordinateRequest>, isDisplayed: boolean }>();
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -16,6 +16,7 @@ onMounted(() => {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
     setInterval(() => {
+      if(!props.isDisplayed) return; // do not display coordinates if isDisplayed is false
       ctx.clear();
       ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
       if(props.annon){
@@ -28,6 +29,23 @@ onMounted(() => {
     console.error("Could not get canvas context");
   }
 });
+
+// Methods
+const drawCalQuads = () => {
+  const ctxBase = canvas.value?.getContext("2d");
+  if (ctxBase) {
+    const ctx = new CanvasDrawer(ctxBase);
+    ctx.clear();
+    ctx.drawCalibrationQuads(['rgb(255, 0, 0, 0.2)', 'rgb(0, 255, 0, 0.2)', 'rgb(255, 255, 0, 0.2)', 'rgb(0, 0, 255, 0.2)'])
+  } else {
+    console.error("Could not get canvas context");
+  }
+}
+
+defineExpose({
+    drawCalQuads
+})
+
 </script>
 <template>
   <div>

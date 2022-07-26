@@ -33,4 +33,8 @@ export default class ServicesIPC implements IServicesIPC {
     const session_id = ServicesIPC.appContext.session._id;
     return await SavedPointsModel.find({ session_id: session_id });
   }
+
+  async recalibrate() {
+    console.log("recalibration command received");
+  }
 }

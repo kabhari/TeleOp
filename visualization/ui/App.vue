@@ -15,6 +15,8 @@ const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC insta
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
 let annotationLabel = ref<String>("");
+let isDisplayed = ref<boolean>(true);
+const CanvasComponent = ref<any>();
 let coordinateUnlisten: () => void;
 let dataCanvas = {} as CoordinateRequest;
 let annotatedCanvas = [] as Array<CoordinateRequest>;
@@ -74,13 +76,27 @@ function view() {
   isAnon = !isAnon;
 };
 
+function recalibrate() {
+  clientRPC.send("recalibrate").then(() => {
+    // stop displaying the coordinates on canvas
+    isDisplayed.value = false;
+    // display the calibration quads on canvas
+    CanvasComponent.value?.drawCalQuads();
+    // TODO: go through the calibration process and then set isDisplayed to true when done
+    // for the time being, just delay for a bit and then set isDisplayed to true
+    setTimeout(() => {
+      isDisplayed.value = true;
+    }, 3000);
+  });
+};
+
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <div id="body" class="grow flex justify-center items-center gap-8">
-      <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" /></div>
-      <div id="body_main" class=""><Canvas :data="dataCanvas" :annon="annotatedCanvas" /></div>
+      <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" @recalibrate="recalibrate" /></div>
+      <div id="body_main" class=""><Canvas ref="CanvasComponent" :data="dataCanvas" :annon="annotatedCanvas" :isDisplayed="isDisplayed" /></div>
       <div id="toolbar_right">right</div>
     </div>
     <div>
