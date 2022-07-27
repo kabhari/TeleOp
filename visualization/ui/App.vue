@@ -107,13 +107,13 @@ function calib(isCalibrating: boolean) {
           if (!isQuadClicked[0]) {
             console.info("Calibrate command sent for quad 1");
             colors[0] = 'rgb(255, 0, 0, 1.0)';
-            text[0] = '✓';
+            text[0] = '...';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           } else {
             console.info("Calibration for quad 1 is now complete");
             colors[0] = 'rgb(255, 0, 0, 0.2)';
-            text[0] = '1';
+            text[0] = '✓';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           }
@@ -124,13 +124,13 @@ function calib(isCalibrating: boolean) {
           if (!isQuadClicked[1]) {
             console.info("Calibrate command sent for quad 2");
             colors[1] = 'rgb(0, 255, 0, 1.0)';
-            text[1] = '✓';
+            text[1] = '...';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           } else {
             console.info("Calibration for quad 2 is now complete");
             colors[1] = 'rgb(0, 255, 0, 0.2)';
-            text[1] = '2';
+            text[1] = '✓';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           }
@@ -141,13 +141,13 @@ function calib(isCalibrating: boolean) {
           if (!isQuadClicked[2]) {
             console.info("Calibrate command sent for quad 3");
             colors[2] = 'rgb(255, 255, 0, 1.0)';
-            text[2] = '✓';
+            text[2] = '...';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           } else {
             console.info("Calibration for quad 3 is now complete");
             colors[2] = 'rgb(255, 255, 0, 0.2)';
-            text[2] = '3';
+            text[2] = '✓';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           }
@@ -158,13 +158,13 @@ function calib(isCalibrating: boolean) {
           if (!isQuadClicked[3]) {
             console.info("Calibrate command sent for quad 4");
             colors[3] = 'rgb(0, 0, 255, 1.0)';
-            text[3] = '✓';
+            text[3] = '...';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           } else {
             console.info("Calibration for quad 4 is now complete");
             colors[3] = 'rgb(0, 0, 255, 0.2)';
-            text[3] = '4';
+            text[3] = '✓';
             // redraw the calibration quads on canvas
             CanvasComponent.value?.drawCalQuads(colors, text);
           }
