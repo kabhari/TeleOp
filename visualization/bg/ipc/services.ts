@@ -34,7 +34,7 @@ export default class ServicesIPC implements IServicesIPC {
     return await SavedPointsModel.find({ session_id: session_id });
   }
 
-  async recalibrate() {
-    console.log("recalibration command received");
+  async calibrate(quad: number) {
+    console.log("calibrating quad #", quad);
   }
 }

@@ -13,17 +13,25 @@ import { ISavedPoint } from "../bg/data/models/savedpoint.model";
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
 // declare a ref to hold the canvas reference
-const canvas = ref<HTMLCanvasElement | null>(null);
 let annotationLabel = ref<String>("");
-let isDisplayed = ref<boolean>(true);
+let isCoordDisplayed = ref<boolean>(true);
 const CanvasComponent = ref<any>();
 let coordinateUnlisten: () => void;
+let coordinateListen: () => void;
 let dataCanvas = {} as CoordinateRequest;
 let annotatedCanvas = [] as Array<CoordinateRequest>;
-let isAnon = true;
+let isAnonnotationDisplayed = true;
 let labelCount = 0;
 
 onMounted(() => {
+  coordinateListen();
+});
+
+onUnmounted(() => {
+  coordinateUnlisten();
+});
+
+coordinateListen = () => {
   // Register a listener for incoming coordinates
   coordinateUnlisten = clientRPC.listen(
     "coordinate",
@@ -32,12 +40,12 @@ onMounted(() => {
       dataCanvas.y = data.y;
     }
   );
-});
+}
 
-onUnmounted(() => {
+coordinateUnlisten = () => {
   // Unregister the listener for incoming coordinates
-  coordinateUnlisten();
-});
+  clientRPC.unlisten("coordinate");
+}
 
 function annotate() {
   // Save the X and Y that are currently visible on the canvas
@@ -51,14 +59,14 @@ function annotate() {
   };
 
   clientRPC.send("annotate", savedPoint).then(() => {
-    console.log("Annotate command sent");
+    console.info("Annotate command sent");
   });
 
   // TODO we might need to wait for a reply to confirm the point is actually saved!
 }
 
 function view() {
-  if (isAnon) {
+  if (isAnonnotationDisplayed) {
     clientRPC.send("view").then((res: any) => {
       for (let points in res) {
         let x: number = res[points].saved_x;
@@ -73,21 +81,44 @@ function view() {
       annotatedCanvas.pop();
     }
   }
-  isAnon = !isAnon;
+  isAnonnotationDisplayed = !isAnonnotationDisplayed;
 };
 
-function recalibrate() {
-  clientRPC.send("recalibrate").then(() => {
-    // stop displaying the coordinates on canvas
-    isDisplayed.value = false;
+function calibrate(isCalibrating: boolean) {
+  if(isCalibrating) {
+    // stop listening to incoming coordinates & displaying them 
+    isCoordDisplayed.value = false;
+    coordinateUnlisten();
+
     // display the calibration quads on canvas
-    CanvasComponent.value?.drawCalQuads();
-    // TODO: go through the calibration process and then set isDisplayed to true when done
-    // for the time being, just delay for a bit and then set isDisplayed to true
-    setTimeout(() => {
-      isDisplayed.value = true;
-    }, 3000);
-  });
+    const quads = CanvasComponent.value?.drawCalQuads();
+    // mouse up event listener for the calibration quads
+    CanvasComponent.value?.canvas.addEventListener('mouseup', (event: any) => {
+      const ctx = CanvasComponent.value?.canvas.getContext("2d");
+      // Check whether point is inside each quad
+      if (ctx.isPointInPath(quads[0], event.offsetX, event.offsetY)) {
+        clientRPC.send("calibrate", 1).then(() => {
+          console.info("Calibrate command sent for quad 1");
+        });
+      } else if (ctx.isPointInPath(quads[1], event.offsetX, event.offsetY)) {
+        clientRPC.send("calibrate", 2).then(() => {
+          console.info("Calibrate command sent for quad 2");
+        });
+      } else if (ctx.isPointInPath(quads[2], event.offsetX, event.offsetY)) {
+        clientRPC.send("calibrate", 3).then(() => {
+          console.info("Calibrate command sent for quad 3");
+        });
+      } else if (ctx.isPointInPath(quads[3], event.offsetX, event.offsetY)) {
+        clientRPC.send("calibrate", 4).then(() => {
+          console.info("Calibrate command sent for quad 4");
+        });
+      }})  
+
+    } else {
+      // start listening to incoming coordinates & starts displaying them 
+      isCoordDisplayed.value = true;
+      coordinateListen();
+    }
 };
 
 </script>
@@ -95,8 +126,13 @@ function recalibrate() {
 <template>
   <div class="flex flex-col h-full">
     <div id="body" class="grow flex justify-center items-center gap-8">
-      <div id="toolbar_left"><PanelLeft @annotate="annotate" @view="view" @recalibrate="recalibrate" /></div>
-      <div id="body_main" class=""><Canvas ref="CanvasComponent" :data="dataCanvas" :annon="annotatedCanvas" :isDisplayed="isDisplayed" /></div>
+      <div id="toolbar_left">
+        <PanelLeft @annotate="annotate" @view="view" @calibrate="calibrate" />
+      </div>
+      <div id="body_main" class="">
+        <Canvas ref="CanvasComponent" :data="dataCanvas" :annon="annotatedCanvas"
+          :isCoordDisplayed="isCoordDisplayed" />
+      </div>
       <div id="toolbar_right">right</div>
     </div>
     <div>

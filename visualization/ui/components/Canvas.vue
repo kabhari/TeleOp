@@ -3,7 +3,11 @@ import { CoordinateRequest } from "../../proto/coordinate";
 import { ref, onMounted } from "vue";
 import CanvasDrawer from "./CanvasDrawer";
 
-const props = defineProps<{ data: CoordinateRequest, annon: Array<CoordinateRequest>, isDisplayed: boolean }>();
+const props = defineProps<{
+  data: CoordinateRequest,
+  annon: Array<CoordinateRequest>,
+  isCoordDisplayed: boolean
+}>();
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -16,7 +20,7 @@ onMounted(() => {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
     setInterval(() => {
-      if(!props.isDisplayed) return; // do not display coordinates if isDisplayed is false
+      if(!props.isCoordDisplayed) return; // do not display coordinates if isCoordDisplayed is false
       ctx.clear();
       ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
       if(props.annon){
@@ -36,14 +40,21 @@ const drawCalQuads = () => {
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
-    ctx.drawCalibrationQuads(['rgb(255, 0, 0, 0.2)', 'rgb(0, 255, 0, 0.2)', 'rgb(255, 255, 0, 0.2)', 'rgb(0, 0, 255, 0.2)'])
+    const quads =
+      ctx.drawCalibrationQuads([
+        'rgb(255, 0, 0, 0.2)',
+        'rgb(0, 255, 0, 0.2)',
+        'rgb(255, 255, 0, 0.2)',
+        'rgb(0, 0, 255, 0.2)'])
+    return quads;
   } else {
     console.error("Could not get canvas context");
   }
 }
 
 defineExpose({
-    drawCalQuads
+    drawCalQuads,
+    canvas
 })
 
 </script>
