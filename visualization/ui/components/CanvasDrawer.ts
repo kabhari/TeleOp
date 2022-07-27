@@ -65,44 +65,44 @@ export default class CanvasDrawer {
     let counter = 0;
 
     // first quad
-    quad_one.moveTo(this.canvas_w / 2, this.canvas_h / 2)
+    quad_one.moveTo(this.canvas_w / 2, 3 * this.canvas_h / 8)
     quad_one.quadraticCurveTo(this.canvas_w, this._padding, this.canvas_w / 2, this._padding);
-    quad_one.quadraticCurveTo(0, this._padding, this.canvas_w / 2, this.canvas_h / 2);
+    quad_one.quadraticCurveTo(0, this._padding, this.canvas_w / 2, 3 * this.canvas_h / 8);
     this.ctx.fillStyle = color[counter];
     this.ctx.fill(quad_one);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(text !== undefined ? text[0] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, this.canvas_h / 4)
+    this.ctx.fillText(text !== undefined ? text[0] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, this.canvas_h / 5)
 
     // second quad
-    quad_two.moveTo(this.canvas_w / 2, this.canvas_h / 2);
+    quad_two.moveTo(this.canvas_w / 2, 5 * this.canvas_h / 8);
     quad_two.quadraticCurveTo(this.canvas_w, this.canvas_h - this._padding, this.canvas_w / 2, this.canvas_h - this._padding);
-    quad_two.quadraticCurveTo(0, this.canvas_h - this._padding, this.canvas_w / 2, this.canvas_h / 2);
+    quad_two.quadraticCurveTo(0, this.canvas_h - this._padding, this.canvas_w / 2, 5 * this.canvas_h / 8);
     this.ctx.fillStyle = color[counter];
     this.ctx.fill(quad_two);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(text !== undefined ? text[1] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, 3 * this.canvas_h / 4 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[1] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, 9 * this.canvas_h / 10 - this._padding);
 
     // third quad
-    quad_three.moveTo(this.canvas_w / 2, this.canvas_h / 2);
+    quad_three.moveTo(3 * this.canvas_w / 8, this.canvas_h / 2);
     quad_three.quadraticCurveTo(this._padding, this.canvas_h, this._padding, this.canvas_h / 2)
-    quad_three.quadraticCurveTo(this._padding, this._padding, this.canvas_w / 2, this.canvas_h / 2)
+    quad_three.quadraticCurveTo(this._padding, this._padding, 3 * this.canvas_w / 8, this.canvas_h / 2)
     this.ctx.fillStyle = color[counter];
     this.ctx.fill(quad_three);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(text !== undefined ? text[2] : counter.toString(), this.canvas_w / 4 - 2 * this._padding, this.canvas_h / 2 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[2] : counter.toString(), this.canvas_w / 5 - 2 * this._padding, this.canvas_h / 2 + this._padding);
 
     //fourth quad
-    quad_four.moveTo(this.canvas_w / 2, this.canvas_h / 2);
+    quad_four.moveTo(5 * this.canvas_w / 8, this.canvas_h / 2);
     quad_four.quadraticCurveTo(this.canvas_w, this.canvas_h, this.canvas_w - this._padding, this.canvas_h / 2);
-    quad_four.quadraticCurveTo(this.canvas_w, this._padding, this.canvas_w / 2, this.canvas_h / 2);
+    quad_four.quadraticCurveTo(this.canvas_w, this._padding, 5 * this.canvas_w / 8, this.canvas_h / 2);
     this.ctx.fillStyle = color[counter];
     this.ctx.fill(quad_four);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(text !== undefined ? text[3] : counter.toString(), 3 * this.canvas_w / 4 + this._padding, this.canvas_h / 2 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[3] : counter.toString(), 9 * this.canvas_w / 10 - 4 * this._padding, this.canvas_h / 2 + this._padding);
 
     return [quad_one, quad_two, quad_three, quad_four]
   }
