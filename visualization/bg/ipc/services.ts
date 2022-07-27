@@ -3,7 +3,7 @@ import SavedPointsModel, {
   ISavedPoint,
   ISavedPointExtended,
 } from "../data/models/savedpoint.model";
-import { IServicesIPC } from "../../shared/Interfaces";
+import { IServicesIPC, quads } from "../../shared/Interfaces";
 
 export default class ServicesIPC implements IServicesIPC {
   static appContext: AppContext;
@@ -34,7 +34,11 @@ export default class ServicesIPC implements IServicesIPC {
     return await SavedPointsModel.find({ session_id: session_id });
   }
 
-  async calibrate(quad: number) {
-    console.log("calibrating quad #", quad);
+  async calibrate(quads: quads) {
+    if (!quads.isQuadClicked[quads.q - 1]) {
+      console.log("calibrating quad #", quads.q, "started");
+    } else {
+      console.log("calibrating quad #", quads.q, "is complete");
+    }
   }
 }

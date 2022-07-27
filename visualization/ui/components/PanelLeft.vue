@@ -16,7 +16,7 @@ let toggleCalibrate = ref<boolean>(true);
         Annotate
       </a>
 
-      <a href="#" class="panel-item" @click="$emit('calibrate', toggleCalibrate); toggleCalibrate = !toggleCalibrate;">
+      <a href="#" class="panel-item" @click="$emit('calib', toggleCalibrate); toggleCalibrate = !toggleCalibrate;">
         <IconRecalibrate />
         {{ toggleCalibrate ? 'Start Calibration' : 'End Calibration' }}
       </a>

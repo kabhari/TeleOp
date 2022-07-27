@@ -35,17 +35,13 @@ onMounted(() => {
 });
 
 // Methods
-const drawCalQuads = () => {
+const drawCalQuads = (colors: Array<string>, text?: Array<string>) => {
   const ctxBase = canvas.value?.getContext("2d");
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
     const quads =
-      ctx.drawCalibrationQuads([
-        'rgb(255, 0, 0, 0.2)',
-        'rgb(0, 255, 0, 0.2)',
-        'rgb(255, 255, 0, 0.2)',
-        'rgb(0, 0, 255, 0.2)'])
+      ctx.drawCalibrationQuads(colors, text)
     return quads;
   } else {
     console.error("Could not get canvas context");

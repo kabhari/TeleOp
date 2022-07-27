@@ -56,7 +56,7 @@ export default class CanvasDrawer {
           }
         })  
   */
-  drawCalibrationQuads(color: Array<string>): Array<Path2D> {
+  drawCalibrationQuads(color: Array<string>, text?: Array<string>): Array<Path2D> {
     let quad_one = new Path2D();
     let quad_two = new Path2D();
     let quad_three = new Path2D();
@@ -72,7 +72,7 @@ export default class CanvasDrawer {
     this.ctx.fill(quad_one);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(counter.toString(), this.canvas_w / 2 - 2 * this._padding, this.canvas_h / 4)
+    this.ctx.fillText(text !== undefined ? text[0] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, this.canvas_h / 4)
 
     // second quad
     quad_two.moveTo(this.canvas_w / 2, this.canvas_h / 2);
@@ -82,7 +82,7 @@ export default class CanvasDrawer {
     this.ctx.fill(quad_two);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(counter.toString(), this.canvas_w / 2 - 2 * this._padding, 3 * this.canvas_h / 4 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[1] : counter.toString(), this.canvas_w / 2 - 2 * this._padding, 3 * this.canvas_h / 4 + this._padding);
 
     // third quad
     quad_three.moveTo(this.canvas_w / 2, this.canvas_h / 2);
@@ -92,7 +92,7 @@ export default class CanvasDrawer {
     this.ctx.fill(quad_three);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(counter.toString(), this.canvas_w / 4 - 2 * this._padding, this.canvas_h / 2 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[2] : counter.toString(), this.canvas_w / 4 - 2 * this._padding, this.canvas_h / 2 + this._padding);
 
     //fourth quad
     quad_four.moveTo(this.canvas_w / 2, this.canvas_h / 2);
@@ -102,7 +102,7 @@ export default class CanvasDrawer {
     this.ctx.fill(quad_four);
     this.ctx.fillStyle = 'black';
     counter++;
-    this.ctx.fillText(counter.toString(), 3 * this.canvas_w / 4 + this._padding, this.canvas_h / 2 + this._padding);
+    this.ctx.fillText(text !== undefined ? text[3] : counter.toString(), 3 * this.canvas_w / 4 + this._padding, this.canvas_h / 2 + this._padding);
 
     return [quad_one, quad_two, quad_three, quad_four]
   }
