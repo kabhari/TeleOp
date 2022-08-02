@@ -10,7 +10,6 @@ message CoordinateRequest {
     double x = 1;
     double y = 2;
     google.protobuf.Timestamp t = 3;
-    optional string label = 4;
 }
 
 message CoordinateResponse {

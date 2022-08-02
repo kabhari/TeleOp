@@ -1,4 +1,3 @@
-import { ISession } from "./../data/models/session.model";
 import {
   sendUnaryData,
   ServerReadableStream,
@@ -16,11 +15,8 @@ import ServerIPC from "../ipc/server";
 import CoordinatesModel, {
   ICoordinate,
   ICoordinates,
-} from "../data/models/coord.model";
+} from "../data/models/coordinates.model";
 import AppContext from "../appContext";
-
-let counter = 0;
-let lastHzCalculate = Date.now();
 
 class Coordinate implements CoordinateServer {
   [method: string]: UntypedHandleCall;
@@ -73,7 +69,6 @@ class Coordinate implements CoordinateServer {
           y: req.y,
           t: new Date(),
         } as ICoordinate);
-
         // Forward the data over the IPC channel
         Coordinate.serverIPC.push("coordinate", req);
       })

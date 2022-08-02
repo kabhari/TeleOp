@@ -1,8 +1,7 @@
 import AppContext from "../appContext";
-import SavedPointsModel, {
-  ISavedPoint,
-  ISavedPointExtended,
-} from "../data/models/savedpoint.model";
+import CoordinateSavedModel, {
+  ICoordinateSaved,
+} from "../data/models/coordinatesaved.model";
 import { IServicesIPC, quads } from "../../shared/Interfaces";
 
 export default class ServicesIPC implements IServicesIPC {
@@ -16,22 +15,21 @@ export default class ServicesIPC implements IServicesIPC {
     return message;
   }
 
-  async annotate(savedPoint: ISavedPoint) {
+  async annotate(savedPoint: ICoordinateSaved) {
     // Add time and session ID to the saved point
-    const savedPointModel: ISavedPointExtended = {
+    const savedPointModel: ICoordinateSaved = {
       ...savedPoint,
-      saved_t: new Date(),
       session_id: ServicesIPC.appContext.session._id,
     };
     console.log("annotate", savedPointModel);
-    const coordinate = new SavedPointsModel(savedPointModel);
+    const coordinate = new CoordinateSavedModel(savedPointModel);
     await coordinate.save();
   }
 
   // return all the annotated points that belongs to current session
-  async view() {
+  async view(): Promise<ICoordinateSaved[]> {
     const session_id = ServicesIPC.appContext.session._id;
-    return await SavedPointsModel.find({ session_id: session_id });
+    return CoordinateSavedModel.find({ session_id: session_id });
   }
 
   async calibrate(quads: quads) {
