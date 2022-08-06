@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import IconAnnotate from "../assets/icons/annotate.svg";
 import IconRecalibrate from "../assets/icons/recalibrate.svg";
+import { ref } from "vue";
+
+let toggleCalibrate = ref<boolean>(true);
+
+const props = defineProps<{
+  isAnnotationDisplayed: boolean;
+}>();
 </script>
 
 <template>
@@ -11,9 +18,21 @@ import IconRecalibrate from "../assets/icons/recalibrate.svg";
         Annotate
       </a>
 
-      <a href="#" class="panel-item">
+      <a
+        href="#"
+        class="panel-item"
+        @click="
+          $emit('calib', toggleCalibrate);
+          toggleCalibrate = !toggleCalibrate;
+        "
+      >
         <IconRecalibrate />
-        Recalibrate
+        {{ toggleCalibrate ? "Start Calibration" : "End Calibration" }}
+      </a>
+
+      <a href="#" class="panel-item" @click="$emit('view')">
+        <IconAnnotate />
+        {{ isAnnotationDisplayed ? "Hide Annotations" : "View Annotations" }}
       </a>
     </div>
   </div>

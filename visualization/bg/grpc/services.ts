@@ -1,4 +1,3 @@
-import { ISession } from "./../data/models/session.model";
 import {
   sendUnaryData,
   ServerReadableStream,
@@ -13,11 +12,11 @@ import {
 } from "../../proto/coordinate";
 
 import ServerIPC from "../ipc/server";
-import CoordinateModel, { ICoordinate } from "../data/models/coord.model";
+import CoordinatesModel, {
+  ICoordinate,
+  ICoordinates,
+} from "../data/models/coordinates.model";
 import AppContext from "../appContext";
-
-let counter = 0;
-let lastHzCalculate = Date.now();
 
 class Coordinate implements CoordinateServer {
   [method: string]: UntypedHandleCall;
@@ -34,34 +33,42 @@ class Coordinate implements CoordinateServer {
     Coordinate.appContext = AppContext.getInstance();
   }
 
+  // Instruments to buffer data and throttle the DB calls
+  static bufferCoordinates: ICoordinate[] = [];
+  static inThrottle: boolean = false;
+  static async saveCoordinate(coord: ICoordinate) {
+    // Add data to buffer
+    Coordinate.bufferCoordinates.push(coord);
+
+    if (!Coordinate.inThrottle) {
+      Coordinate.inThrottle = true;
+      setTimeout(() => {
+        console.log(`DB save size: ~${Coordinate.bufferCoordinates.length}`);
+
+        // Save buffer data to DB Asynchronously
+        const coordinates = new CoordinatesModel({
+          data: Coordinate.bufferCoordinates,
+          t_start: Coordinate.bufferCoordinates[0].t,
+          session_id: Coordinate.appContext.session._id,
+        } as ICoordinates);
+        Coordinate.bufferCoordinates = [];
+        coordinates.save();
+        Coordinate.inThrottle = false;
+      }, 1000);
+    }
+  }
+
   public receiveCoordination(
     call: ServerReadableStream<CoordinateRequest, CoordinateResponse>,
     callback: sendUnaryData<CoordinateResponse>
   ): void {
     call
-      .on("data", (req: CoordinateRequest) => {
-        // Calculate the Hz
-        counter += 1;
-        if (counter == 1000) {
-          const now = Date.now();
-          console.log(
-            `Incoming GRPC rate: ${Math.round(
-              (1000 * 1000) / (now - lastHzCalculate)
-            )}Hz`
-          );
-          lastHzCalculate = now;
-          counter = 0;
-        }
-
-        // Save the data in the database
-        const coordinate = new CoordinateModel({
-          x_coordinate: req.x,
-          y_coordinate: req.y,
-          t_coordinate: new Date(),
-          session_id: Coordinate.appContext.session._id,
+      .on("data", async (req: CoordinateRequest) => {
+        Coordinate.saveCoordinate({
+          x: req.x,
+          y: req.y,
+          t: new Date(),
         } as ICoordinate);
-        coordinate.save();
-
         // Forward the data over the IPC channel
         Coordinate.serverIPC.push("coordinate", req);
       })
