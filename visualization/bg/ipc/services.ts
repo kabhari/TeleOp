@@ -2,7 +2,8 @@ import AppContext from "../appContext";
 import CoordinateSavedModel, {
   ICoordinateSaved,
 } from "../data/models/coordinatesaved.model";
-import { IServicesIPC, quads } from "../../shared/Interfaces";
+import { IServicesIPC } from "../../shared/Interfaces";
+import { AppState } from "../../shared/Enums";
 
 export default class ServicesIPC implements IServicesIPC {
   static appContext: AppContext;
@@ -32,11 +33,12 @@ export default class ServicesIPC implements IServicesIPC {
     return CoordinateSavedModel.find({ session_id: session_id });
   }
 
-  async calibrate(quads: quads) {
-    if (!quads.isQuadClicked[quads.q - 1]) {
-      console.log("calibrating quad #", quads.q, "started");
-    } else {
-      console.log("calibrating quad #", quads.q, "is complete");
-    }
+  async calibrate(quad: number) {
+    console.debug("calibrate", quad);
+    return true;
+  }
+
+  async getAppState(): Promise<AppState> {
+    return ServicesIPC.appContext.appState;
   }
 }

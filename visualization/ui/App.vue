@@ -33,12 +33,15 @@ onUnmounted(() => {
 
 coordinateListen = () => {
   // Register a listener for incoming coordinates
-  coordinateUnlisten = clientRPC.listen("coordinate", (data: ICoordinate) => {
-    // We are passing dataCanvas object to the child, if we reassign it here the reference would be lost, so we have to iterate and update
-    dataCanvas.x = data.x;
-    dataCanvas.y = data.y;
-    dataCanvas.t = data.t;
-  });
+  coordinateUnlisten = clientRPC.listen(
+    "streamCoordinate",
+    (data: ICoordinate) => {
+      // We are passing dataCanvas object to the child, if we reassign it here the reference would be lost, so we have to iterate and update
+      dataCanvas.x = data.x;
+      dataCanvas.y = data.y;
+      dataCanvas.t = data.t;
+    }
+  );
 };
 
 coordinateUnlisten = () => {

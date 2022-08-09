@@ -1,3 +1,4 @@
+import { AppState } from "./../shared/Enums";
 import sessionModel, { ISession } from "./data/models/session.model";
 // This is a Singleton
 export default class AppContext {
@@ -7,6 +8,8 @@ export default class AppContext {
   URL_HOST: string;
   URL_MONGODB: string;
   IPC_CHANNEL: string;
+
+  appState: AppState;
   /**
    * The Singleton's constructor should always be private to prevent direct
    * construction calls with the `new` operator.
@@ -23,6 +26,8 @@ export default class AppContext {
       process.exit(1);
     }
     this.IPC_CHANNEL = "message";
+
+    this.appState = AppState.CONNECTING_C;
 
     // save the session & the time it's created in the database
     // the id of the session (i.e. session._id) is injected and referenced in other collections

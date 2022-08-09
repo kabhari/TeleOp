@@ -1,7 +1,9 @@
+import { ICoordinate } from "./../data/models/coordinates.model";
 import ipc from "node-ipc";
 import ServicesIPC from "./services";
 import { IPCResponseType } from "../../shared/Enums";
-class ServerIPC {
+import { IPushIPC } from "../../shared/interfaces";
+class ServerIPC implements IPushIPC {
   services: ServicesIPC;
   IPC_CHANNEL: string;
   constructor(IPC_CHANNEL: string, socketName: string, services: ServicesIPC) {
@@ -57,11 +59,15 @@ class ServerIPC {
     ipc.server.emit(socket, this.IPC_CHANNEL, JSON.stringify(content));
   }
 
-  push(name: string, args: any) {
+  broadcast(name: string, args: any) {
     ipc.server.broadcast(
       this.IPC_CHANNEL,
       JSON.stringify({ type: IPCResponseType.push, name, args })
     );
+  }
+
+  streamCoordinate(coordinate: ICoordinate) {
+    this.broadcast("streamCoordinate", coordinate);
   }
 }
 

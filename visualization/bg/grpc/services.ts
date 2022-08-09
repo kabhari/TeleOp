@@ -64,13 +64,14 @@ class Coordinate implements CoordinateServer {
   ): void {
     call
       .on("data", async (req: CoordinateRequest) => {
-        Coordinate.saveCoordinate({
+        const coordinate = {
           x: req.x,
           y: req.y,
           t: new Date(),
-        } as ICoordinate);
+        } as ICoordinate;
+        Coordinate.saveCoordinate(coordinate);
         // Forward the data over the IPC channel
-        Coordinate.serverIPC.push("coordinate", req);
+        Coordinate.serverIPC.streamCoordinate(coordinate);
       })
       .on("end", () => {
         // TODO we need to refine this, save the session end etc.
