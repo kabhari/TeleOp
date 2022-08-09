@@ -23,31 +23,22 @@ let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
 let labelCount = 0;
 
+const addPushListeners = () => {
+  clientRPC.listen("streamCoordinate", (data: ICoordinate) => {
+    // We are passing dataCanvas object to the child, if we reassign it here the reference would be lost, so we have to iterate and update
+    dataCanvas.x = data.x;
+    dataCanvas.y = data.y;
+    dataCanvas.t = data.t;
+  });
+};
+
 onMounted(() => {
-  coordinateListen();
+  addPushListeners();
 });
 
 onUnmounted(() => {
-  coordinateUnlisten();
+  clientRPC.unlisten("streamCoordinate");
 });
-
-coordinateListen = () => {
-  // Register a listener for incoming coordinates
-  coordinateUnlisten = clientRPC.listen(
-    "streamCoordinate",
-    (data: ICoordinate) => {
-      // We are passing dataCanvas object to the child, if we reassign it here the reference would be lost, so we have to iterate and update
-      dataCanvas.x = data.x;
-      dataCanvas.y = data.y;
-      dataCanvas.t = data.t;
-    }
-  );
-};
-
-coordinateUnlisten = () => {
-  // Unregister the listener for incoming coordinates
-  clientRPC.unlisten("coordinate");
-};
 
 async function annotate() {
   // Save the X and Y that are currently visible on the canvas
