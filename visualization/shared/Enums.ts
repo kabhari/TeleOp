@@ -5,8 +5,8 @@ export enum IPCResponseType {
 }
 
 export enum AppState {
-  CONNECTING_BG = "Connecting to background service",
-  CONNECTING_C = "Connecting to python",
+  WAITING_IPC = "Waiting for IPC",
+  WAITING_GRPC = "Waiting for GRPC",
   CALIBRATING = "Calibrating",
   STREAMING = "Streaming",
 }

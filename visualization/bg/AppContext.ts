@@ -9,7 +9,7 @@ export default class AppContext {
   URL_MONGODB: string;
   IPC_CHANNEL: string;
 
-  appState: AppState;
+  private appState: AppState;
   /**
    * The Singleton's constructor should always be private to prevent direct
    * construction calls with the `new` operator.
@@ -27,13 +27,21 @@ export default class AppContext {
     }
     this.IPC_CHANNEL = "message";
 
-    this.appState = AppState.CONNECTING_C;
+    this.appState = AppState.WAITING_GRPC;
 
     // save the session & the time it's created in the database
     // the id of the session (i.e. session._id) is injected and referenced in other collections
     this.session = new sessionModel({
       session_started: new Date(),
     } as ISession);
+  }
+
+  public setAppState(appState: AppState) {
+    this.appState = appState;
+    console.debug("setAppState", appState);
+  }
+  public getAppState(): AppState {
+    return this.appState;
   }
 
   /**

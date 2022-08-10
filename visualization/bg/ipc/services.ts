@@ -39,6 +39,6 @@ export default class ServicesIPC implements IServicesIPC {
   }
 
   async getAppState(): Promise<AppState> {
-    return ServicesIPC.appContext.appState;
+    return ServicesIPC.appContext.getAppState();
   }
 }

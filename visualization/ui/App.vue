@@ -9,6 +9,8 @@ import { ClientRPCKey } from "./symbols";
 import ClientIPC from "./ClientIPC";
 import { ICoordinateSaved } from "../bg/data/models/coordinatesaved.model";
 import { ICoordinate } from "../bg/data/models/coordinates.model";
+import { AppState } from "../shared/Enums";
+import { type } from "os";
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
@@ -22,6 +24,7 @@ let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
 let labelCount = 0;
+let appState = ref<AppState>(AppState.WAITING_IPC);
 
 const addPushListeners = () => {
   clientRPC.listen("streamCoordinate", (data: ICoordinate) => {
@@ -30,11 +33,24 @@ const addPushListeners = () => {
     dataCanvas.y = data.y;
     dataCanvas.t = data.t;
   });
+  clientRPC.listen("pushAppState", (data: AppState) => {
+    appState.value = data;
+  });
 };
 
 onMounted(() => {
   addPushListeners();
+  getAppState();
 });
+
+async function getAppState() {
+  const state = (await clientRPC.send("getAppState")) as AppState;
+  if (state) {
+    appState.value = state;
+  } else {
+    console.error("Invalid Application State");
+  }
+}
 
 onUnmounted(() => {
   clientRPC.unlisten("streamCoordinate");
@@ -166,6 +182,7 @@ function calib(isCalibrating: boolean) {
 
 <template>
   <div class="flex flex-col h-full">
+    <div :innerHTML="appState"></div>
     <div id="body" class="grow flex justify-center items-center gap-8">
       <div id="toolbar_left">
         <PanelLeft

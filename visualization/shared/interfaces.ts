@@ -12,4 +12,5 @@ export interface IServicesIPC {
 
 export interface IPushIPC {
   streamCoordinate(coordinate: ICoordinate): void;
+  pushAppState(appState: AppState): void;
 }

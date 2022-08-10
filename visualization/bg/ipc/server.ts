@@ -1,7 +1,7 @@
 import { ICoordinate } from "./../data/models/coordinates.model";
 import ipc from "node-ipc";
 import ServicesIPC from "./services";
-import { IPCResponseType } from "../../shared/Enums";
+import { AppState, IPCResponseType } from "../../shared/Enums";
 import { IPushIPC } from "../../shared/interfaces";
 class ServerIPC implements IPushIPC {
   services: ServicesIPC;
@@ -68,6 +68,10 @@ class ServerIPC implements IPushIPC {
 
   streamCoordinate(coordinate: ICoordinate) {
     this.broadcast("streamCoordinate", coordinate);
+  }
+
+  pushAppState(appState: AppState): void {
+    this.broadcast("pushAppState", appState);
   }
 }
 
