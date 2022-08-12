@@ -13,7 +13,7 @@ load_dotenv()
 GRPC_HOST=os.getenv('GRPC_HOST')
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
-    def ReceiveCoordination(self, request_iterator, context):
+    def StreamCoordinations(self, request_iterator, context):
         """Recieve the coordinates from the client
         https://grpc.io/docs/languages/python/basics/#request-streaming-rpc
 

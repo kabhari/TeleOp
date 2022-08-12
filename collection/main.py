@@ -86,10 +86,8 @@ def send_message(stub):
     Args:
         stub: The client in this case
     """
-    response = stub.ReceiveCoordination(generate_messages())
-    log.warning(
-        response
-    )  # this is the message sent by the server upon receiving all coordinates (in case they're finite)
+    stub.StreamCoordinations(generate_messages())
+    
 
 
 def run():

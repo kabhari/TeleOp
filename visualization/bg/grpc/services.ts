@@ -58,7 +58,7 @@ class Coordinate implements CoordinateServer {
     }
   }
 
-  public receiveCoordination(
+  public streamCoordinations(
     call: ServerReadableStream<CoordinateRequest, CoordinateResponse>,
     callback: sendUnaryData<CoordinateResponse>
   ): void {
