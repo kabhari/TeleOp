@@ -38,7 +38,7 @@ class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
             log.info(
                 f"got coordinates: ({coordinate.x},{coordinate.y}) :: sent @ {sentTime} :: received @ {receivedTime} :: with delta of {(receivedTime - sentTime).total_seconds()*1e3} milliseconds"
             )
-        return coordinate_pb2.CoordinateResponse(
+        return coordinate_pb2.StreamCoordinationsResponse(
             message="Server recieved the coordinate"
         )
 

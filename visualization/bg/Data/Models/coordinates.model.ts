@@ -1,13 +1,13 @@
 import { Schema, model, ObjectId, Types } from "mongoose";
-import { CoordinateRequest } from "../../../proto/coordinate";
+import { StreamCoordinationsRequest } from "../../../proto/coordinate";
 // 1. Create an interface representing a document in MongoDB
 
-export interface ICoordinate extends CoordinateRequest {
+export interface ICoordinate extends StreamCoordinationsRequest {
   t: Date;
 }
 
 export interface ICoordinates {
-  data: Types.DocumentArray<CoordinateRequest>;
+  data: Types.DocumentArray<StreamCoordinationsRequest>;
   t_start: Date;
   session_id: ObjectId;
 }

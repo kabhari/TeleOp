@@ -3,15 +3,24 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 service Coordinate{
-    rpc StreamCoordinations(stream CoordinateRequest) returns (CoordinateResponse);
+    rpc StreamCoordinations(stream StreamCoordinationsRequest) returns (StreamCoordinationsResponse);
+    rpc Calibrate(stream CalibrateRequest) returns (CalibrateResponse);
 }
 
-message CoordinateRequest {
+message StreamCoordinationsRequest {
     double x = 1;
     double y = 2;
     google.protobuf.Timestamp t = 3;
 }
 
-message CoordinateResponse {
+message StreamCoordinationsResponse {
     // It is empty for now but we might do something with it in the future.
+}
+
+message CalibrateRequest{
+    // It is empty for now but we might do something with it in the future.
+}
+
+message CalibrateResponse{
+    int quad = 1;
 }

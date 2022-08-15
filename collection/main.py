@@ -34,7 +34,7 @@ def generate_messages():
     src: https://grpc.io/docs/languages/python/basics/#response-streaming-rpc
 
     Yields:
-        CoordinateRequest: a proto message containing an (x, y) coordinate and the corresponding timestamp
+        StreamCoordinationsRequest: a proto message containing an (x, y) coordinate and the corresponding timestamp
     """
     # We are making use of protobuf's Timestamp() to transfer timestamps
     timestamp = Timestamp()
@@ -53,7 +53,7 @@ def generate_messages():
         # stamp the data with current date + time
         timestamp.FromDatetime(datetime.datetime.now())
         # construct the message
-        msg = coordinate_pb2.CoordinateRequest(
+        msg = coordinate_pb2.StreamCoordinationsRequest(
             x=generate_random_pnt_circle(10* math.sin(r), 0, 0, alpha)[0],
             y=generate_random_pnt_circle(10 * math.sin(r), 0, 0, alpha)[1],
             t=timestamp,

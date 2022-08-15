@@ -7,8 +7,8 @@ import {
 import {
   CoordinateServer,
   CoordinateService,
-  CoordinateRequest,
-  CoordinateResponse,
+  StreamCoordinationsRequest,
+  StreamCoordinationsResponse,
 } from "../../proto/coordinate";
 
 import ServerIPC from "../ipc/server";
@@ -59,11 +59,14 @@ class Coordinate implements CoordinateServer {
   }
 
   public streamCoordinations(
-    call: ServerReadableStream<CoordinateRequest, CoordinateResponse>,
-    callback: sendUnaryData<CoordinateResponse>
+    call: ServerReadableStream<
+      StreamCoordinationsRequest,
+      StreamCoordinationsResponse
+    >,
+    callback: sendUnaryData<StreamCoordinationsResponse>
   ): void {
     call
-      .on("data", async (req: CoordinateRequest) => {
+      .on("data", async (req: StreamCoordinationsRequest) => {
         const coordinate = {
           x: req.x,
           y: req.y,
@@ -79,7 +82,7 @@ class Coordinate implements CoordinateServer {
         Coordinate.appContext.session.session_ended = Date;
         //Coordinate.appContext.session.save();
 
-        //callback(null, { message: "got the stream" } as CoordinateResponse);
+        //callback(null, { message: "got the stream" } as StreamCoordinationsResponse);
       })
       .on("error", (err: Error) => {
         console.error("Something went wrong", err.message);
