@@ -13,7 +13,7 @@ load_dotenv()
 GRPC_HOST=os.getenv('GRPC_HOST')
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
-    def StreamCoordinations(self, request_iterator, context):
+    def StreamCoordinate(self, request_iterator, context):
         """Recieve the coordinates from the client
         https://grpc.io/docs/languages/python/basics/#request-streaming-rpc
 
@@ -22,7 +22,7 @@ class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
             context (object): Not sure why this is needed beyond that it's used in the abstract class
 
         Returns:
-            msg: Proto message returned by the server upon recieving all the coordinates (in case there is a finite number of coordinates)
+            msg: Proto message returned by the server upon receiving all the coordinates (in case there is a finite number of coordinates)
         """
         timestamp = Timestamp()
         for coordinate in request_iterator:
@@ -38,8 +38,8 @@ class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
             log.info(
                 f"got coordinates: ({coordinate.x},{coordinate.y}) :: sent @ {sentTime} :: received @ {receivedTime} :: with delta of {(receivedTime - sentTime).total_seconds()*1e3} milliseconds"
             )
-        return coordinate_pb2.StreamCoordinationsResponse(
-            message="Server recieved the coordinate"
+        return coordinate_pb2.StreamCoordinateResponse(
+            message="Server received the coordinate"
         )
 
 

@@ -6,8 +6,9 @@ import { IPushIPC } from "../../shared/interfaces";
 class ServerIPC implements IPushIPC {
   services: ServicesIPC;
   IPC_CHANNEL: string;
-  constructor(IPC_CHANNEL: string, socketName: string, services: ServicesIPC) {
-    this.services = services;
+  constructor(IPC_CHANNEL: string, socketName: string) {
+    this.services = new ServicesIPC();
+
     this.IPC_CHANNEL = IPC_CHANNEL;
 
     ipc.config.id = socketName;

@@ -1,23 +1,33 @@
 import { AppState } from "./../shared/Enums";
 import sessionModel, { ISession } from "./data/models/session.model";
+import ServerGRPC from "./grpc/server";
+import ServerIPC from "./ipc/Server";
+import ServicesIPC from "./ipc/services";
 // This is a Singleton
 export default class AppContext {
   private static instance: AppContext;
   // TODO build the correct type
-  session: any;
-  URL_HOST: string;
-  URL_MONGODB: string;
-  IPC_CHANNEL: string;
+  static session: any;
+  static URL_HOST: string;
+  static URL_MONGODB: string;
+  static IPC_CHANNEL: string;
 
-  private appState: AppState;
+  static isDev: boolean;
+  static version: string;
+
+  static serverIPC: ServerIPC;
+  static serverGRPC: ServerGRPC;
+
+  private static appState: AppState;
+
   /**
    * The Singleton's constructor should always be private to prevent direct
    * construction calls with the `new` operator.
    */
   private constructor() {
     if (process.env["GRPC_HOST"] && process.env["MONGO_HOST"]) {
-      this.URL_HOST = process.env["GRPC_HOST"];
-      this.URL_MONGODB = process.env["MONGO_HOST"];
+      AppContext.URL_HOST = process.env["GRPC_HOST"];
+      AppContext.URL_MONGODB = process.env["MONGO_HOST"];
     } else {
       console.error(
         "Please check the .env file to ensure it includes the GRPC and MongoDB host",
@@ -25,23 +35,47 @@ export default class AppContext {
       );
       process.exit(1);
     }
-    this.IPC_CHANNEL = "message";
+    AppContext.IPC_CHANNEL = "message";
 
-    this.appState = AppState.WAITING_GRPC;
+    AppContext.appState = AppState.WAITING_GRPC;
 
     // save the session & the time it's created in the database
     // the id of the session (i.e. session._id) is injected and referenced in other collections
-    this.session = new sessionModel({
+    AppContext.session = new sessionModel({
       session_started: new Date(),
     } as ISession);
+
+    // Now start the servers
+
+    if (process.argv[2] === "--subprocess") {
+      AppContext.isDev = false;
+      AppContext.version = process.argv[3];
+
+      let socketName = process.argv[4];
+      AppContext.serverIPC = new ServerIPC(AppContext.IPC_CHANNEL, socketName);
+      AppContext.serverGRPC = new ServerGRPC(AppContext.URL_HOST);
+    } else {
+      let { ipcRenderer } = require("electron");
+      AppContext.isDev = true;
+      AppContext.version = "dev";
+
+      // If this is dev, we need to wait for socket to be ready
+      ipcRenderer.on("set-socket", (event: any, { socketName }: any) => {
+        AppContext.serverIPC = new ServerIPC(
+          AppContext.IPC_CHANNEL,
+          socketName
+        );
+        AppContext.serverGRPC = new ServerGRPC(AppContext.URL_HOST);
+      });
+    }
   }
 
-  public setAppState(appState: AppState) {
-    this.appState = appState;
-    console.debug("setAppState", appState);
+  public static setAppState(appState: AppState) {
+    AppContext.appState = appState;
+    AppContext.serverIPC.pushAppState(appState);
   }
-  public getAppState(): AppState {
-    return this.appState;
+  public static getAppState(): AppState {
+    return AppContext.appState;
   }
 
   /**

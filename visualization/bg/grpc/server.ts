@@ -10,8 +10,8 @@ export default class ServerGRPC {
     "grpc.max_send_message_length": -1,
   });
 
-  constructor(serverIPC: ServerIPC, host: string) {
-    this.server.addService(CoordinateService, new Coordinate(serverIPC));
+  constructor(host: string) {
+    this.server.addService(CoordinateService, new Coordinate());
     this.server.bindAsync(
       host,
       ServerCredentials.createInsecure(),

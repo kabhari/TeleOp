@@ -29,12 +29,12 @@ def generate_random_pnt_circle(radius, center_x, center_y, alpha):
     return radius * math.cos(alpha) + center_x, radius * math.sin(alpha) + center_y
 
 
-def generate_messages():
+def stream_coordinations_logic():
     """This function generates messages (iterator) be sent to the server from the stub (client).
     src: https://grpc.io/docs/languages/python/basics/#response-streaming-rpc
 
     Yields:
-        StreamCoordinationsRequest: a proto message containing an (x, y) coordinate and the corresponding timestamp
+        StreamCoordinateRequest: a proto message containing an (x, y) coordinate and the corresponding timestamp
     """
     # We are making use of protobuf's Timestamp() to transfer timestamps
     timestamp = Timestamp()
@@ -53,7 +53,7 @@ def generate_messages():
         # stamp the data with current date + time
         timestamp.FromDatetime(datetime.datetime.now())
         # construct the message
-        msg = coordinate_pb2.StreamCoordinationsRequest(
+        msg = coordinate_pb2.StreamCoordinateRequest(
             x=generate_random_pnt_circle(10* math.sin(r), 0, 0, alpha)[0],
             y=generate_random_pnt_circle(10 * math.sin(r), 0, 0, alpha)[1],
             t=timestamp,
@@ -79,24 +79,35 @@ def generate_messages():
         yield msg
 
 
-def send_message(stub):
-    """Calling the request-streaming generate_message()
-    src: https://grpc.io/docs/languages/python/basics/#request-streaming-rpc-1
+calibrated_quads = [False, False,  False,  False]
 
-    Args:
-        stub: The client in this case
-    """
-    stub.StreamCoordinations(generate_messages())
-    
+def is_calibrated():
+    return calibrated_quads[0] and calibrated_quads[1] and calibrated_quads[2] and calibrated_quads[3]
+
+def generate_calibration_stream():
+    while not is_calibrated():
+        yield coordinate_pb2.StreamCoordinateResponse()
 
 
 def run():
     """Create  the client"""
     with grpc.insecure_channel(GRPC_HOST) as channel:
         stub = coordinate_pb2_grpc.CoordinateStub(channel)
-        send_message(stub)
+        
+        log.info("Calibration Initialized")
 
+        # Calibration Starts
+        for calibrationResponse in stub.calibrate(generate_calibration_stream()):
+            if calibrationResponse.quad !=-1:
+                calibrated_quads[calibrationResponse.quad] = True
+            else:
+                log.info("Waiting")
 
+        log.info("Calibration Finalized") 
+
+        stub.streamCoordinate(stream_coordinations_logic())
+
+    
 # setup logging
 logging.basicConfig(
     format=" %(asctime)s | %(name)s : %(levelname)s | %(message)s",

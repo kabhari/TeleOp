@@ -6,10 +6,7 @@ import { IServicesIPC } from "../../shared/Interfaces";
 import { AppState } from "../../shared/Enums";
 
 export default class ServicesIPC implements IServicesIPC {
-  static appContext: AppContext;
-  constructor() {
-    ServicesIPC.appContext = AppContext.getInstance();
-  }
+  constructor() {}
 
   echo(message: any) {
     console.log("echo", message);
@@ -20,7 +17,7 @@ export default class ServicesIPC implements IServicesIPC {
     // Add time and session ID to the saved point
     const savedPointModel: ICoordinateSaved = {
       ...savedPoint,
-      session_id: ServicesIPC.appContext.session._id,
+      session_id: AppContext.session._id,
     };
     console.log("annotate", savedPointModel);
     const coordinate = new CoordinateSavedModel(savedPointModel);
@@ -29,7 +26,7 @@ export default class ServicesIPC implements IServicesIPC {
 
   // return all the annotated points that belongs to current session
   async view(): Promise<ICoordinateSaved[]> {
-    const session_id = ServicesIPC.appContext.session._id;
+    const session_id = AppContext.session._id;
     return CoordinateSavedModel.find({ session_id: session_id });
   }
 
@@ -39,6 +36,6 @@ export default class ServicesIPC implements IServicesIPC {
   }
 
   async getAppState(): Promise<AppState> {
-    return ServicesIPC.appContext.getAppState();
+    return AppContext.getAppState();
   }
 }
