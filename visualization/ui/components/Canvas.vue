@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, defineEmits } from "vue";
-import CanvasDrawer from "./CanvasDrawer";
+import { ref, onMounted } from "vue";
+import CanvasDrawer, { RGBA } from "./CanvasDrawer";
 import { ICoordinate } from "../../bg/data/models/coordinates.model";
 import { ICoordinateSaved } from "../../bg/data/models/coordinatesaved.model";
 import { AppState } from "../../shared/Enums";
@@ -16,6 +16,14 @@ const emit = defineEmits(["calibrationClicked"]);
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
 const updateRate = 1000 / 50; /* 50Hz */
+const calibrationColors = [
+  { r: 255, g: 0, b: 0, a: 0.3 },
+  { r: 0, g: 255, b: 0, a: 0.3 },
+  { r: 255, g: 255, b: 0, a: 0.3 },
+  { r: 0, g: 0, b: 255, a: 0.3 },
+] as RGBA[];
+const calibrationTexts = ["1", "2", "3", "4"];
+let calibrationQuads: Path2D[];
 
 onMounted(() => {
   // Register a listener for incoming coordinates
@@ -24,12 +32,17 @@ onMounted(() => {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
     setInterval(() => {
+      ctx.clear();
       if (props.appState === AppState.STREAMING) {
         drawStream(ctx);
         if (props.annotation) {
           drawAnnotations(ctx);
         }
       } else if (props.appState === AppState.CALIBRATING) {
+        calibrationQuads = ctx.drawCalibrationQuads(
+          calibrationColors,
+          calibrationTexts
+        );
       }
     }, updateRate);
   } else {
@@ -37,8 +50,27 @@ onMounted(() => {
   }
 });
 
+function handleClick(event: MouseEvent) {
+  const ctxBase = canvas.value?.getContext("2d");
+  if (
+    ctxBase &&
+    props.appState === AppState.CALIBRATING &&
+    calibrationQuads.length == 4
+  ) {
+    const ctx = new CanvasDrawer(ctxBase);
+    calibrationQuads.forEach((quad, index) => {
+      if (ctx.ctx.isPointInPath(quad, event.offsetX, event.offsetY)) {
+        //clientRPC.send("calibrate", { q: 1, isQuadClicked }).then(() => {
+        console.info("Calibrate command sent for quad 1");
+        calibrationColors[index].a = 0.1;
+        calibrationTexts[index] = "...";
+      }
+      //});
+    });
+  }
+}
+
 function drawStream(ctx: CanvasDrawer) {
-  ctx.clear();
   ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
 }
 
@@ -53,29 +85,17 @@ function drawAnnotations(ctx: CanvasDrawer) {
     );
   });
 }
-
-// Methods
-const drawCalQuads = (colors: Array<string>, text?: Array<string>) => {
-  const ctxBase = canvas.value?.getContext("2d");
-  if (ctxBase) {
-    const ctx = new CanvasDrawer(ctxBase);
-    ctx.clear();
-    const quads = ctx.drawCalibrationQuads(colors, text);
-    return quads;
-  } else {
-    console.error("Could not get canvas context");
-  }
-};
-
-defineExpose({
-  drawCalQuads,
-  canvas,
-});
 </script>
 <template>
   <div>
     <div>
-      <canvas ref="canvas" id="canvas" width="500" height="500" />
+      <canvas
+        ref="canvas"
+        id="canvas"
+        width="500"
+        height="500"
+        @click="handleClick"
+      />
     </div>
   </div>
 </template>
