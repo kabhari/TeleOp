@@ -65,7 +65,11 @@ class Coordinate implements CoordinateServer {
         if (AppContext.getAppState() != AppState.CALIBRATING) {
           AppContext.setAppState(AppState.CALIBRATING);
         }
-        //call.write({ quad: -1 } as CalibrateResponse);
+        if (AppContext.lastCalibrationEvent?.isValid()) {
+          call.write({
+            quad: AppContext.lastCalibrationEvent.quad,
+          } as CalibrateResponse);
+        }
       })
       .on("end", () => {
         AppContext.setAppState(AppState.STREAMING);

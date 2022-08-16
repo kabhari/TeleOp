@@ -17,10 +17,10 @@ const emit = defineEmits(["calibrationClicked"]);
 const canvas = ref<HTMLCanvasElement | null>(null);
 const updateRate = 1000 / 50; /* 50Hz */
 const calibrationColors = [
-  { r: 255, g: 0, b: 0, a: 0.3 },
-  { r: 0, g: 255, b: 0, a: 0.3 },
-  { r: 255, g: 255, b: 0, a: 0.3 },
-  { r: 0, g: 0, b: 255, a: 0.3 },
+  { r: 255, g: 0, b: 0, a: 0.2 },
+  { r: 0, g: 255, b: 0, a: 0.2 },
+  { r: 255, g: 255, b: 0, a: 0.2 },
+  { r: 0, g: 0, b: 255, a: 0.2 },
 ] as RGBA[];
 const calibrationTexts = ["1", "2", "3", "4"];
 let calibrationQuads: Path2D[];
@@ -60,12 +60,11 @@ function handleClick(event: MouseEvent) {
     const ctx = new CanvasDrawer(ctxBase);
     calibrationQuads.forEach((quad, index) => {
       if (ctx.ctx.isPointInPath(quad, event.offsetX, event.offsetY)) {
-        //clientRPC.send("calibrate", { q: 1, isQuadClicked }).then(() => {
-        console.info("Calibrate command sent for quad 1");
-        calibrationColors[index].a = 0.1;
-        calibrationTexts[index] = "...";
+        emit("calibrationClicked", index);
+        console.info(`Calibrate command sent for quad ${index}`);
+        calibrationColors[index].a = 0.5;
+        calibrationTexts[index] = "✓";
       }
-      //});
     });
   }
 }

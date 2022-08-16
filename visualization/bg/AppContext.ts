@@ -1,8 +1,8 @@
+import { CalibrationEvent } from "./calibration";
 import { AppState } from "./../shared/Enums";
 import sessionModel, { ISession } from "./data/models/session.model";
 import ServerGRPC from "./grpc/server";
 import ServerIPC from "./ipc/Server";
-import ServicesIPC from "./ipc/services";
 // This is a Singleton
 export default class AppContext {
   private static instance: AppContext;
@@ -17,6 +17,8 @@ export default class AppContext {
 
   static serverIPC: ServerIPC;
   static serverGRPC: ServerGRPC;
+
+  static lastCalibrationEvent: CalibrationEvent;
 
   private static appState: AppState;
 

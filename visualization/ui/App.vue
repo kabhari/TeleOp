@@ -10,7 +10,6 @@ import ClientIPC from "./ClientIPC";
 import { ICoordinateSaved } from "../bg/data/models/coordinatesaved.model";
 import { ICoordinate } from "../bg/data/models/coordinates.model";
 import { AppState } from "../shared/Enums";
-import { type } from "os";
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
@@ -52,6 +51,10 @@ async function getAppState() {
 onUnmounted(() => {
   clientRPC.unlisten("streamCoordinate");
 });
+
+async function calibrationClicked(quad: number) {
+  await clientRPC.send("calibrate", quad);
+}
 
 async function annotate() {
   // Save the X and Y that are currently visible on the canvas
@@ -99,6 +102,7 @@ async function fetchSavedPoints() {
           :data="dataCanvas"
           :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
           :appState="appState"
+          @calibrationClicked="calibrationClicked"
         />
       </div>
       <div id="toolbar_right">right</div>

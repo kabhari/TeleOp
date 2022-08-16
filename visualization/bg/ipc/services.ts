@@ -4,6 +4,7 @@ import CoordinateSavedModel, {
 } from "../data/models/coordinatesaved.model";
 import { IServicesIPC } from "../../shared/Interfaces";
 import { AppState } from "../../shared/Enums";
+import { CalibrationEvent } from "../calibration";
 
 export default class ServicesIPC implements IServicesIPC {
   constructor() {}
@@ -32,6 +33,7 @@ export default class ServicesIPC implements IServicesIPC {
 
   async calibrate(quad: number) {
     console.debug("calibrate", quad);
+    AppContext.lastCalibrationEvent = new CalibrationEvent(quad);
     return true;
   }
 

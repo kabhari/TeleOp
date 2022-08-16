@@ -100,6 +100,7 @@ def run():
         for calibrationResponse in stub.calibrate(generate_calibration_stream()):
             if calibrationResponse.quad !=-1:
                 calibrated_quads[calibrationResponse.quad] = True
+                log.info(f"Calibration received for quad {calibrationResponse.quad}") 
             else:
                 log.info("Waiting")
 
