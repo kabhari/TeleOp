@@ -190,6 +190,7 @@ function calib(isCalibrating: boolean) {
           @view="isAnnotationDisplayed = !isAnnotationDisplayed"
           @calib="calib"
           :isAnnotationDisplayed="isAnnotationDisplayed"
+          :appState="appState"
         />
       </div>
       <div id="body_main" class="">
