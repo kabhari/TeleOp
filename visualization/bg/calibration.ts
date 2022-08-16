@@ -1,10 +1,12 @@
 export class CalibrationEvent {
-  static VALIDITY_TIME = 10; // milliseconds
+  static VALIDITY_TIME = 100; // milliseconds
   quad: number;
   time: Date;
+  isResolved: boolean;
   constructor(quad: number) {
     this.quad = quad;
     this.time = new Date();
+    this.isResolved = false;
   }
   isValid(): boolean {
     return (

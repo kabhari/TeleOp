@@ -86,8 +86,7 @@ def is_calibrated():
 
 def generate_calibration_stream():
     while not is_calibrated():
-        yield coordinate_pb2.StreamCoordinateResponse()
-
+        yield coordinate_pb2.CalibrateRequest()
 
 def run():
     """Create  the client"""
@@ -99,7 +98,7 @@ def run():
         # Calibration Starts
         for calibrationResponse in stub.calibrate(generate_calibration_stream()):
             if calibrationResponse.quad !=-1:
-                calibrated_quads[calibrationResponse.quad] = True
+                calibrated_quads[calibrationResponse.quad - 1] = True
                 log.info(f"Calibration received for quad {calibrationResponse.quad}") 
             else:
                 log.info("Waiting")

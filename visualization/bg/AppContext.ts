@@ -18,7 +18,7 @@ export default class AppContext {
   static serverIPC: ServerIPC;
   static serverGRPC: ServerGRPC;
 
-  static lastCalibrationEvent: CalibrationEvent;
+  static lastCalibrationEvent: CalibrationEvent | undefined;
 
   private static appState: AppState;
 

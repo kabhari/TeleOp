@@ -31,13 +31,27 @@ export default class ServicesIPC implements IServicesIPC {
     return CoordinateSavedModel.find({ session_id: session_id });
   }
 
-  async calibrate(quad: number) {
-    console.debug("calibrate", quad);
+  async calibrate(quad: number): Promise<boolean> {
     AppContext.lastCalibrationEvent = new CalibrationEvent(quad);
-    return true;
+
+    return delay(CalibrationEvent.VALIDITY_TIME).then(() => {
+      if (AppContext.lastCalibrationEvent?.isResolved) {
+        console.debug("calibrated", quad);
+        return true;
+      } else {
+        console.error("Calibration was not sent to GRPC in time");
+        return false;
+      }
+    });
   }
 
   async getAppState(): Promise<AppState> {
     return AppContext.getAppState();
   }
+}
+
+function delay(t: number) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve.bind(null), t);
+  });
 }

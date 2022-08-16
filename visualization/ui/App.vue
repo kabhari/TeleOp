@@ -52,10 +52,6 @@ onUnmounted(() => {
   clientRPC.unlisten("streamCoordinate");
 });
 
-async function calibrationClicked(quad: number) {
-  await clientRPC.send("calibrate", quad);
-}
-
 async function annotate() {
   // Save the X and Y that are currently visible on the canvas
   const savedPoint: ICoordinateSaved = {
@@ -102,7 +98,6 @@ async function fetchSavedPoints() {
           :data="dataCanvas"
           :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
           :appState="appState"
-          @calibrationClicked="calibrationClicked"
         />
       </div>
       <div id="toolbar_right">right</div>

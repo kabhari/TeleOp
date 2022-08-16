@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { inject, ref, onMounted } from "vue";
 import CanvasDrawer, { RGBA } from "./CanvasDrawer";
 import { ICoordinate } from "../../bg/data/models/coordinates.model";
 import { ICoordinateSaved } from "../../bg/data/models/coordinatesaved.model";
 import { AppState } from "../../shared/Enums";
+import ClientIPC from "../ClientIPC";
+import { ClientRPCKey } from "../symbols";
 
 const props = defineProps<{
   data: ICoordinate;
@@ -11,7 +13,7 @@ const props = defineProps<{
   appState: AppState;
 }>();
 
-const emit = defineEmits(["calibrationClicked"]);
+const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -60,10 +62,18 @@ function handleClick(event: MouseEvent) {
     const ctx = new CanvasDrawer(ctxBase);
     calibrationQuads.forEach((quad, index) => {
       if (ctx.ctx.isPointInPath(quad, event.offsetX, event.offsetY)) {
-        emit("calibrationClicked", index);
+        clientRPC.send("calibrate", index).then((success) => {
+          if (success) {
+            calibrationColors[index].a = 0.6;
+            calibrationTexts[index] = "✓";
+          } else {
+            calibrationColors[index].a = 0.2;
+            calibrationTexts[index] = (index + 1).toString();
+          }
+        });
         console.info(`Calibrate command sent for quad ${index}`);
-        calibrationColors[index].a = 0.5;
-        calibrationTexts[index] = "✓";
+        calibrationColors[index].a = 0.3;
+        calibrationTexts[index] = "...";
       }
     });
   }
