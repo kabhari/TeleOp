@@ -38,7 +38,7 @@ const props = defineProps<{
           class="panel-item"
           href="#"
           @click="
-            $emit('calib', toggleCalibrate);
+            $emit('recalibrate', toggleCalibrate);
             toggleCalibrate = !toggleCalibrate;
           "
         >

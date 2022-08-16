@@ -68,6 +68,7 @@ class Coordinate implements CoordinateServer {
         //call.write({ quad: -1 } as CalibrateResponse);
       })
       .on("end", () => {
+        AppContext.setAppState(AppState.STREAMING);
         call.end();
       })
       .on("error", (err: Error) => {

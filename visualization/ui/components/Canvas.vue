@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, defineEmits } from "vue";
 import CanvasDrawer from "./CanvasDrawer";
 import { ICoordinate } from "../../bg/data/models/coordinates.model";
 import { ICoordinateSaved } from "../../bg/data/models/coordinatesaved.model";
+import { AppState } from "../../shared/Enums";
 
 const props = defineProps<{
   data: ICoordinate;
   annotation: Array<ICoordinateSaved>;
-  isCoordDisplayed: boolean;
+  appState: AppState;
 }>();
+
+const emit = defineEmits(["calibrationClicked"]);
 
 // declare a ref to hold the canvas reference
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -21,30 +24,35 @@ onMounted(() => {
     const ctx = new CanvasDrawer(ctxBase);
     ctx.clear();
     setInterval(() => {
-      if (!props.isCoordDisplayed) return; // do not display coordinates if isCoordDisplayed is false
-      ctx.clear();
-      ctx.drawCircle(
-        10 * props.data.x + 250,
-        10 * props.data.y + 250,
-        5,
-        "black"
-      );
-      if (props.annotation) {
-        props.annotation.forEach((annotationPoint) => {
-          ctx.drawCircle(
-            10 * annotationPoint.x + 250,
-            10 * annotationPoint.y + 250,
-            5,
-            "red",
-            annotationPoint.label?.toString()
-          );
-        });
+      if (props.appState === AppState.STREAMING) {
+        drawStream(ctx);
+        if (props.annotation) {
+          drawAnnotations(ctx);
+        }
+      } else if (props.appState === AppState.CALIBRATING) {
       }
     }, updateRate);
   } else {
     console.error("Could not get canvas context");
   }
 });
+
+function drawStream(ctx: CanvasDrawer) {
+  ctx.clear();
+  ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
+}
+
+function drawAnnotations(ctx: CanvasDrawer) {
+  props.annotation.forEach((annotationPoint) => {
+    ctx.drawCircle(
+      10 * annotationPoint.x + 250,
+      10 * annotationPoint.y + 250,
+      5,
+      "red",
+      annotationPoint.label?.toString()
+    );
+  });
+}
 
 // Methods
 const drawCalQuads = (colors: Array<string>, text?: Array<string>) => {
