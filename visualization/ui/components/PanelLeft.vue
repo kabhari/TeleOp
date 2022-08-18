@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import IconAnnotate from "../assets/icons/annotate.svg";
 import IconRecalibrate from "../assets/icons/recalibrate.svg";
+import IconCalibrating from "../assets/icons/calibrating.svg";
+import IconEyeOn from "../assets/icons/eyeOn.svg";
+import IconEyeOff from "../assets/icons/eyeOff.svg";
+import IconCamera from "../assets/icons/camera.svg";
 import { ref } from "vue";
 import { AppState } from "../../shared/Enums";
 
@@ -13,49 +17,58 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col flex-grow border-r border-gray-200 pt-5 pb-4 w-40">
-    <div class="mt-5 flex-grow flex flex-col">
-      <a
-        href="#"
-        class="panel-item"
-        :class="{ disabled: appState != AppState.STREAMING }"
-        @click="$emit('annotate')"
-      >
-        <IconAnnotate />
-        Annotate
-      </a>
+  <div
+    class="flex flex-col flex-grow w-40 flex-grow flex flex-col justify-content h-96"
+  >
+    <a
+      href="#"
+      class="panel-item"
+      :class="{ disabled: appState != AppState.STREAMING }"
+      @click="$emit('annotate')"
+    >
+      <IconAnnotate />
+      Annotate
+    </a>
 
-      <a>
-        <a
-          v-if="appState == AppState.CALIBRATING"
-          class="panel-item disabled"
-          href="#"
-        >
-          <IconRecalibrate /> Calibrating
-        </a>
-        <a
-          v-else
-          class="panel-item"
-          href="#"
-          @click="
-            $emit('recalibrate', toggleCalibrate);
-            toggleCalibrate = !toggleCalibrate;
-          "
-        >
-          <IconRecalibrate /> Recalibrate
-        </a>
-      </a>
-
+    <a>
       <a
+        v-if="appState == AppState.CALIBRATING"
+        class="panel-item disabled"
         href="#"
-        class="panel-item"
-        :class="{ disabled: appState != AppState.STREAMING }"
-        @click="$emit('view')"
       >
-        <IconAnnotate />
-        {{ isAnnotationDisplayed ? "Hide Annotations" : "View Annotations" }}
+        <IconCalibrating /> Calibrating
       </a>
-    </div>
+      <a
+        v-else
+        class="panel-item"
+        href="#"
+        @click="
+          $emit('recalibrate', toggleCalibrate);
+          toggleCalibrate = !toggleCalibrate;
+        "
+      >
+        <IconRecalibrate /> Recalibrate
+      </a>
+    </a>
+
+    <a
+      href="#"
+      class="panel-item"
+      :class="{ disabled: appState != AppState.STREAMING }"
+      @click="$emit('view')"
+    >
+      <IconEyeOn v-if="isAnnotationDisplayed" />
+      <IconEyeOff v-else />
+      {{ isAnnotationDisplayed ? "Hide" : "Show" }}
+    </a>
+
+    <a
+      href="#"
+      class="panel-item"
+      :class="{ disabled: appState != AppState.STREAMING }"
+    >
+      <IconCamera /> Record
+    </a>
   </div>
 </template>
 
