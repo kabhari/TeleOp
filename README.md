@@ -2,21 +2,19 @@
 
 ## Setup
 
-### Extensions
-
-Make sure your VSCode has the following Extensions:
-
-- Vue Volar extension Pack
-
 ### Install
 
-Ensure you have the [Protocol Buffer Compiler](https://grpc.io/docs/protoc-installation/) installed globally
-[Windows] Make sure protoc is added to your path.
-
+- Ensure you have the [Protocol Buffer Compiler](https://grpc.io/docs/protoc-installation/) installed globally. In case of Windows machines, please add `protoc` to your path.
 - Run `npm run install`
 - Run `npm run proto`
 
+### Extensions
+
+You may install the `Vue Volar extension Pack` if you're using Visual Stuido Code as your IDE & plan to edit the front-end code; otherwise, skip to the next step. 
+
 ## Execute
+
+Make sure to run `Visualization` module first followed by the `Collection` module:
 
 ### Visualization
 
@@ -24,7 +22,6 @@ Ensure you have the [Protocol Buffer Compiler](https://grpc.io/docs/protoc-insta
 
 ### Collection
 
-- [Temporary/testing] Run `cd collection && python server.py`
 - Run `npm run c:dev`
 
 ## Format
