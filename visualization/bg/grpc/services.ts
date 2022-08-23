@@ -1,14 +1,20 @@
 import {
+  handleClientStreamingCall,
+  handleServerStreamingCall,
   sendUnaryData,
+  ServerDuplexStream,
   ServerReadableStream,
+  ServerWritableStream,
   UntypedHandleCall,
 } from "@grpc/grpc-js";
 
 import {
+  CalibrateRequest,
+  CalibrateResponse,
   CoordinateServer,
   CoordinateService,
-  CoordinateRequest,
-  CoordinateResponse,
+  StreamCoordinateRequest,
+  StreamCoordinateResponse,
 } from "../../proto/coordinate";
 
 import ServerIPC from "../ipc/server";
@@ -17,25 +23,18 @@ import CoordinatesModel, {
   ICoordinates,
 } from "../data/models/coordinates.model";
 import AppContext from "../appContext";
+import { AppState } from "../../shared/Enums";
 
 class Coordinate implements CoordinateServer {
   [method: string]: UntypedHandleCall;
 
-  // the session variable is the model we use to save the information about session in mongo
-  // refer to ./Data/Models/session.model for more
-  static appContext: AppContext;
-  static serverIPC: ServerIPC;
-  // TODO: above lines might have concurrency issues, needs to be investigated
-
   // we will save the session model in the constructor
-  constructor(serverIPC: ServerIPC) {
-    Coordinate.serverIPC = serverIPC;
-    Coordinate.appContext = AppContext.getInstance();
-  }
+  constructor() {}
 
   // Instruments to buffer data and throttle the DB calls
   static bufferCoordinates: ICoordinate[] = [];
   static inThrottle: boolean = false;
+
   static async saveCoordinate(coord: ICoordinate) {
     // Add data to buffer
     Coordinate.bufferCoordinates.push(coord);
@@ -49,7 +48,7 @@ class Coordinate implements CoordinateServer {
         const coordinates = new CoordinatesModel({
           data: Coordinate.bufferCoordinates,
           t_start: Coordinate.bufferCoordinates[0].t,
-          session_id: Coordinate.appContext.session._id,
+          session_id: AppContext.session._id,
         } as ICoordinates);
         Coordinate.bufferCoordinates = [];
         coordinates.save();
@@ -58,30 +57,61 @@ class Coordinate implements CoordinateServer {
     }
   }
 
-  public receiveCoordination(
-    call: ServerReadableStream<CoordinateRequest, CoordinateResponse>,
-    callback: sendUnaryData<CoordinateResponse>
+  public calibrate(
+    call: ServerDuplexStream<CalibrateRequest, CalibrateResponse>
   ): void {
     call
-      .on("data", async (req: CoordinateRequest) => {
-        Coordinate.saveCoordinate({
+      .on("data", (req: CalibrateRequest) => {
+        if (AppContext.getAppState() != AppState.CALIBRATING) {
+          AppContext.setAppState(AppState.CALIBRATING);
+        }
+        if (
+          AppContext.lastCalibrationEvent?.isValid() &&
+          !AppContext.lastCalibrationEvent?.isResolved
+        ) {
+          AppContext.lastCalibrationEvent.isResolved = true;
+          call.write({
+            quad: AppContext.lastCalibrationEvent.quad,
+          } as CalibrateResponse);
+        }
+      })
+      .on("end", () => {
+        AppContext.setAppState(AppState.STREAMING);
+        call.end();
+      })
+      .on("error", (err: Error) => {
+        console.error("Something went wrong during calibration", err.message);
+      });
+  }
+
+  public streamCoordinate(
+    call: ServerReadableStream<
+      StreamCoordinateRequest,
+      StreamCoordinateResponse
+    >,
+    callback: sendUnaryData<StreamCoordinateResponse>
+  ): void {
+    call
+      .on("data", async (req: StreamCoordinateRequest) => {
+        const coordinate = {
           x: req.x,
           y: req.y,
           t: new Date(),
-        } as ICoordinate);
+        } as ICoordinate;
+        Coordinate.saveCoordinate(coordinate);
         // Forward the data over the IPC channel
-        Coordinate.serverIPC.push("coordinate", req);
+        AppContext.serverIPC.streamCoordinate(coordinate);
       })
       .on("end", () => {
         // TODO we need to refine this, save the session end etc.
         // save the end time in the session collection
-        Coordinate.appContext.session.session_ended = Date;
+        AppContext.session.session_ended = Date;
         //Coordinate.appContext.session.save();
 
-        //callback(null, { message: "got the stream" } as CoordinateResponse);
+        //callback(null, { message: "got the stream" } as StreamCoordinateResponse);
       })
       .on("error", (err: Error) => {
-        console.error("Something went wrong", err.message);
+        console.error("Something went wrong during streaming", err.message);
       });
   }
 }

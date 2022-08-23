@@ -1,4 +1,4 @@
-import { IServicesIPC } from "./../shared/interfaces";
+import { IPushIPC, IServicesIPC } from "./../shared/interfaces";
 /* 
   This class facilitates communication between the client (UI) and the server (BG) using the IPC protocol.
   It is instantiated by specifying the name of the socket to connect to.
@@ -99,7 +99,7 @@ export default class ClientIPC {
    * @param {Function} callback The callback function.
    * @returns {() => void} A function to unlisten to the event.
    */
-  listen(name: string, callback: Function) {
+  listen(name: keyof IPushIPC, callback: Function) {
     if (!this.listeners.get(name)) {
       this.listeners.set(name, []);
     }
@@ -119,7 +119,7 @@ export default class ClientIPC {
    * @param {string} name The name of message to unlisten.
    * @returns {void}
    */
-  unlisten(name: string) {
+  unlisten(name: keyof IPushIPC) {
     this.listeners.set(name, []);
   }
 }
