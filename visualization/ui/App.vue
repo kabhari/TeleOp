@@ -2,7 +2,6 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import Canvas from "./components/Canvas.vue";
-import PanelLeft from "./components/PanelLeft.vue";
 
 import { inject, ref, onMounted, onUnmounted } from "vue";
 import { ClientRPCKey } from "./symbols";
@@ -10,6 +9,8 @@ import ClientIPC from "./ClientIPC";
 import { ICoordinateSaved } from "../bg/data/models/coordinatesaved.model";
 import { ICoordinate } from "../bg/data/models/coordinates.model";
 import { AppState } from "../shared/Enums";
+import PanelRight from "./components/PanelRight.vue";
+import PanelLeft from "./components/PanelLeft.vue";
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
@@ -81,7 +82,6 @@ async function fetchSavedPoints() {
 
 <template>
   <div class="flex flex-col h-full">
-    <div :innerHTML="appState"></div>
     <div id="body" class="grow flex justify-center items-center gap-8">
       <div id="toolbar_left">
         <PanelLeft
@@ -100,9 +100,9 @@ async function fetchSavedPoints() {
           :appState="appState"
         />
       </div>
-      <div id="toolbar_right">right</div>
+      <PanelRight />
     </div>
-    <div>
+    <div v-show="false">
       <h1 class="text-center text-xl">
         <input
           type="text"
@@ -112,7 +112,7 @@ async function fetchSavedPoints() {
       </h1>
     </div>
     <div id="footer">
-      <h1 class="m-16 text-center text-2xl">
+      <h1 class="m-16 text-center text-2xl" v-show="false">
         Press on number 1 to begin calibration
       </h1>
     </div>
