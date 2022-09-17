@@ -1,4 +1,9 @@
+import lzma
 import math
+from PIL import Image
+from os import urandom
+from io import BytesIO
+
 
 def generate_random_pnt_circle(radius, center_x, center_y, alpha):
     """This function generates a random point inside a circle
@@ -16,10 +21,20 @@ def generate_random_pnt_circle(radius, center_x, center_y, alpha):
 
 
 class mock_data_generator:
-    alpha=0
-    r=0
+    alpha = 0
+    r = 0
 
     def iterate(self):
         self.alpha += 0.001
         self.r += 0.0001
         return generate_random_pnt_circle(10 * math.sin(self.r), 0, 0, self.alpha)
+
+    def blob(self):
+        n = 200
+        size = (n, n)
+        img = Image.new("RGB", size)
+        pixels = zip(urandom(n * n), urandom(n * n), urandom(n * n))  # R, G, B
+        img.putdata(list(pixels))
+        img_buffer = BytesIO()
+        img.save(img_buffer, "PNG")
+        return img_buffer

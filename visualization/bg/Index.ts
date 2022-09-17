@@ -1,15 +1,20 @@
-import ServicesIPC from "./ipc/services";
-import ServerIPC from "./ipc/Server";
-import ServerGRPC from "./grpc/server";
 import { connect } from "mongoose";
 import "dotenv/config";
 import AppContext from "./appContext";
+import MinioClient from "./data/minio/client";
 
 async function run_bg() {
   const appContext = AppContext.getInstance();
 
   await connect(AppContext.URL_MONGODB);
   AppContext.session.save();
+
+  // Minio (@Mohammad: Im not sure if it's better to have a separate wrapper for Minio and Mongo or include them all in AppContext.
+  // To me, it sounds like it's better to have them separate but open to discuss!)
+  const minioClient = MinioClient.getInstance();
+  if (minioClient) {
+    console.log("Minio Client started.");
+  }
 
   console.log("Node Process Initiated, is Dev?", AppContext.isDev);
 }
