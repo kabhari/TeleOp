@@ -55,6 +55,7 @@ Please refer to our [README file](visualization/bg/Data/README.md) for more info
 
 ## Tips
 
-- Make sure to run `c:dev` after the visualization module is up and running. If you encounter an error after running `npm run c:dev` too quickly, please try again. This won't be an issue in the prod version. 
-- If getting errors (in visualization module) after pulling in new changes, delete the `visualization > dist` directory and try again. 
+* Make sure to run `c:dev` after the visualization module is up and running. If you encounter an error after running `npm run c:dev` too quickly, please try again. This won't be an issue in the prod version. 
+* Should you encounter the following (or similar) error in the visualization module after pulling in new changes or installing a new library, you may delete the `visualization > dist` directory and try running `npm run v:dev` again:
+    - ```Error: The following dependencies are imported but could not be resolved: Index.js (imported by C:/code/cathpilot/visualization/dist/bg/server-dev.html)```)
 
