@@ -37,10 +37,14 @@ Make sure to run `Visualization` module first followed by the `Collection` modul
 GRPC_HOST=localhost:50051
 ```
 
-- similarly, create an empty `.env` file under the `visualization` directory and add this to indicate server and port number for our GRPC host as well as MonogoDB:
+- similarly, create an empty `.env` file under the `visualization` directory and add this to indicate server and port number for our GRPC host, MonogoDB, and Minio:
 ```
 GRPC_HOST=localhost:50051
 MONGO_HOST=mongodb://127.0.0.1/cathpilot
+MINIO_HOST=localhost
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
 ```
 
 For more information, you can always refer to `.env.template` files under `visualization` and `collection` directories.
