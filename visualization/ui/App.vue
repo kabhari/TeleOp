@@ -11,12 +11,14 @@ import { ICoordinate } from "../bg/data/models/coordinates.model";
 import { AppState } from "../shared/Enums";
 import PanelRight from "./components/PanelRight.vue";
 import PanelLeft from "./components/PanelLeft.vue";
+import { StreamVideoRequest } from "../proto/coordinate";
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
 
 // declare a ref to hold the canvas reference
 let annotationLabel = ref<String>("");
 const CanvasComponent = ref<any>();
+let frame = ref<any>();
 let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
@@ -24,6 +26,9 @@ let labelCount = 0;
 let appState = ref<AppState>(AppState.WAITING_IPC);
 
 const addPushListeners = () => {
+  clientRPC.listen("streamVideo", (req: StreamVideoRequest) => {
+    frame.value = req.data;
+  });
   clientRPC.listen("streamCoordinate", (data: ICoordinate) => {
     // We are passing dataCanvas object to the child, if we reassign it here the reference would be lost, so we have to iterate and update
     dataCanvas.x = data.x;
@@ -51,6 +56,8 @@ async function getAppState() {
 
 onUnmounted(() => {
   clientRPC.unlisten("streamCoordinate");
+  clientRPC.unlisten("streamVideo");
+  clientRPC.unlisten("pushAppState");
 });
 
 async function annotate() {
@@ -82,6 +89,7 @@ async function fetchSavedPoints() {
 
 <template>
   <div class="flex flex-col h-full">
+    {{ appState }}
     <div id="body" class="grow flex justify-center items-center gap-8">
       <div id="toolbar_left">
         <PanelLeft
@@ -92,7 +100,13 @@ async function fetchSavedPoints() {
           :appState="appState"
         />
       </div>
-      <div id="body_main" class="">
+      <div id="body_main" style="width: 500; height: 500">
+        <img
+          v-if="frame"
+          style="width: 300px; height: 300px; margin: 100px"
+          class="absolute opacity-30"
+          v-bind:src="'data:image/jpeg;base64,' + frame"
+        />
         <Canvas
           ref="CanvasComponent"
           :data="dataCanvas"

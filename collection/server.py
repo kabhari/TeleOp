@@ -13,7 +13,7 @@ load_dotenv()
 GRPC_HOST=os.getenv('GRPC_HOST')
 
 class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
-    def StreamCoordinate(self, request_iterator, context):
+    def streamCoordinate(self, request_iterator, context):
         """Recieve the coordinates from the client
         https://grpc.io/docs/languages/python/basics/#request-streaming-rpc
 
@@ -29,24 +29,38 @@ class CoordinateServicer(coordinate_pb2_grpc.CoordinateServicer):
             sentTime = datetime.datetime.fromtimestamp(
                 coordinate.t.seconds + coordinate.t.nanos / 1e9
             )
-            # ToDo: this is a very hacky implementation but for whatever reason serializing `now()` w/ protobuf's Timestamp results in -2 hrs shift! /
-            # Need a better solution but this works for now.
             timestamp.FromDatetime(datetime.datetime.now())
             receivedTime = datetime.datetime.fromtimestamp(
                 timestamp.seconds + timestamp.nanos / 1e9
             )
             log.info(
-                f"got coordinates: ({coordinate.x},{coordinate.y}) :: sent @ {sentTime} :: received @ {receivedTime} :: with delta of {(receivedTime - sentTime).total_seconds()*1e3} milliseconds"
+                f"COORDINATE deltaT: {(receivedTime - sentTime).total_seconds()*1e3} milliseconds"
             )
         return coordinate_pb2.StreamCoordinateResponse(
             message="Server received the coordinate"
         )
 
+class VideoServicer(coordinate_pb2_grpc.VideoServicer):
+    def streamVideo(self, request_iterator, context):
+        timestamp = Timestamp()
+        for video in request_iterator:
+            sentTime = datetime.datetime.fromtimestamp(
+                video.t.seconds + video.t.nanos / 1e9
+            )
+            timestamp.FromDatetime(datetime.datetime.now())
+            receivedTime = datetime.datetime.fromtimestamp(
+                timestamp.seconds + timestamp.nanos / 1e9
+            )
+            log.info(
+                f"VIDEO deltaT: {(receivedTime - sentTime).total_seconds()*1e3} ms"
+            )
+        return coordinate_pb2.StreamVideoResponse()
 
 def main():
     """Create the server & start"""
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     coordinate_pb2_grpc.add_CoordinateServicer_to_server(CoordinateServicer(), server)
+    coordinate_pb2_grpc.add_VideoServicer_to_server(VideoServicer(),server)
     server.add_insecure_port(GRPC_HOST)
     server.start()
     log.info(

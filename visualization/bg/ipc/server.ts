@@ -3,6 +3,7 @@ import ipc from "node-ipc";
 import ServicesIPC from "./services";
 import { AppState, IPCResponseType } from "../../shared/Enums";
 import { IPushIPC } from "../../shared/interfaces";
+import { StreamVideoRequest } from "../../proto/coordinate";
 class ServerIPC implements IPushIPC {
   services: ServicesIPC;
   IPC_CHANNEL: string;
@@ -69,6 +70,10 @@ class ServerIPC implements IPushIPC {
 
   streamCoordinate(coordinate: ICoordinate) {
     this.broadcast("streamCoordinate", coordinate);
+  }
+
+  streamVideo(video: StreamVideoRequest): void {
+    this.broadcast("streamVideo", video);
   }
 
   pushAppState(appState: AppState): void {

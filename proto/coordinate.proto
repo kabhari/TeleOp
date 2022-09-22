@@ -24,3 +24,16 @@ message CalibrateRequest{
 message CalibrateResponse{
     int32 quad = 1;
 }
+
+service Video{
+    rpc streamVideo(stream StreamVideoRequest) returns (StreamVideoResponse);
+}
+
+message StreamVideoRequest{
+    string data = 1; // Base64 Encoded Image
+    google.protobuf.Timestamp t = 2;
+}
+
+message StreamVideoResponse{
+    // It is empty for now but we might do something with it in the future.
+}
