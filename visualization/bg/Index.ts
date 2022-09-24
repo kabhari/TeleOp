@@ -11,7 +11,7 @@ async function run_bg() {
 
   // Minio (@Mohammad: Im not sure if it's better to have a separate wrapper for Minio and Mongo or include them all in AppContext.
   // To me, it sounds like it's better to have them separate but open to discuss!)
-  const minioClient = MinioClient.getInstance();
+  const minioClient = MinioClient.getMinioClient;
   if (minioClient) {
     console.log("Minio Client started.");
   }

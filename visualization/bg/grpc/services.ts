@@ -25,6 +25,8 @@ import CoordinatesModel, {
 } from "../data/models/coordinates.model";
 import AppContext from "../appContext";
 import { AppState } from "../../shared/Enums";
+import MinioCrud from "../data/minio/crud";
+import MinioClient from "../data/minio/client";
 
 class Video implements VideoServer {
   [method: string]: UntypedHandleCall;
@@ -37,6 +39,27 @@ class Video implements VideoServer {
       .on("data", async (req: StreamVideoRequest) => {
         // Forward the data over the IPC channel
         AppContext.serverIPC.streamVideo(req);
+        if (!!!req.data) return;
+
+        /* example of creating an object */
+        MinioCrud.create(
+          MinioClient.getMinioClient,
+          "data",
+          "us-east-1",
+          "streamed_image",
+          req.data,
+          true // note: if set to false, each object will replace the old one because it has the same name
+        );
+
+        /* example of removal of an object */
+        //MinioCrud.remove(MinioClient.getMinioClient, "data", "streamed_image");
+
+        /* example of updating an object */
+        // setting the appendTime to false (default) will overwrite the object
+        // MinioCrud.create(MinioClient.getMinioClient, "data", "us-east-1", "streamed_image", req.data);
+
+        /* example of reading an object */
+        // let object = MinioCrud.read(MinioClient.getMinioClient, "data", "streamed_image");
       })
       .on("error", (err: Error) => {
         console.error("Something went wrong during streaming", err.message);
