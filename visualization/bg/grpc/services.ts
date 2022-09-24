@@ -1,10 +1,7 @@
 import {
-  handleClientStreamingCall,
-  handleServerStreamingCall,
   sendUnaryData,
   ServerDuplexStream,
   ServerReadableStream,
-  ServerWritableStream,
   UntypedHandleCall,
 } from "@grpc/grpc-js";
 
@@ -12,9 +9,13 @@ import {
   CalibrateRequest,
   CalibrateResponse,
   CoordinateServer,
+  VideoServer,
   CoordinateService,
+  VideoService,
   StreamCoordinateRequest,
   StreamCoordinateResponse,
+  StreamVideoRequest,
+  StreamVideoResponse,
 } from "../../proto/coordinate";
 
 import ServerIPC from "../ipc/server";
@@ -25,11 +26,26 @@ import CoordinatesModel, {
 import AppContext from "../appContext";
 import { AppState } from "../../shared/Enums";
 
-class Coordinate implements CoordinateServer {
+class Video implements VideoServer {
   [method: string]: UntypedHandleCall;
 
-  // we will save the session model in the constructor
-  constructor() {}
+  public streamVideo(
+    call: ServerReadableStream<StreamVideoRequest, StreamVideoResponse>,
+    callback: sendUnaryData<StreamVideoResponse>
+  ): void {
+    call
+      .on("data", async (req: StreamVideoRequest) => {
+        // Forward the data over the IPC channel
+        AppContext.serverIPC.streamVideo(req);
+      })
+      .on("error", (err: Error) => {
+        console.error("Something went wrong during streaming", err.message);
+      });
+  }
+}
+
+class Coordinate implements CoordinateServer {
+  [method: string]: UntypedHandleCall;
 
   // Instruments to buffer data and throttle the DB calls
   static bufferCoordinates: ICoordinate[] = [];
@@ -116,4 +132,4 @@ class Coordinate implements CoordinateServer {
   }
 }
 
-export { Coordinate, CoordinateService };
+export { Coordinate, CoordinateService, VideoService, Video };

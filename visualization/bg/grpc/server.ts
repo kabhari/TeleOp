@@ -1,6 +1,6 @@
 import "source-map-support/register";
 import { Server, ServerCredentials } from "@grpc/grpc-js";
-import { Coordinate, CoordinateService } from "./services";
+import { Coordinate, CoordinateService, Video, VideoService } from "./services";
 import ServerIPC from "../ipc/server";
 
 export default class ServerGRPC {
@@ -12,6 +12,7 @@ export default class ServerGRPC {
 
   constructor(host: string) {
     this.server.addService(CoordinateService, new Coordinate());
+    this.server.addService(VideoService, new Video());
     this.server.bindAsync(
       host,
       ServerCredentials.createInsecure(),
