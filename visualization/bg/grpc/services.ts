@@ -59,7 +59,22 @@ class Video implements VideoServer {
         // MinioCrud.create(MinioClient.getMinioClient, "data", "us-east-1", "streamed_image", req.data);
 
         /* example of reading an object */
-        // let object = MinioCrud.read(MinioClient.getMinioClient, "data", "streamed_image");
+        /* let object = MinioCrud.read(
+          MinioClient.getMinioClient,
+          "data",
+          "streamed_image"
+        );
+        const stream = await object.createStream();
+        var string = "";
+        if (stream) {
+          stream.on("error", (_e) => {
+            console.log("Unknown error");
+          });
+          stream.on("data", function (data) {
+            string += data.toString();
+            console.log("stream data " + string);
+          });
+        } */
       })
       .on("error", (err: Error) => {
         console.error("Something went wrong during streaming", err.message);
