@@ -1,5 +1,6 @@
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
+app.commandLine.appendSwitch('enable-features','SharedArrayBuffer')
 
 const isDev = process.env.IS_DEV == "true" ? true : false;
 
@@ -53,7 +54,8 @@ function createBackgroundWindow(socketName) {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
-        enableRemoteModule: true
+        enableRemoteModule: true,
+        nodeIntegration: true,
       }
     })
     win.loadURL(`file://${path.join(__dirname, '../dist/bg/server-dev.html')}`)

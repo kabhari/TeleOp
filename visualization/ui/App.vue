@@ -74,6 +74,10 @@ async function annotate() {
   await fetchSavedPoints();
 }
 
+async function record() {
+  await clientRPC.send("record");
+}
+
 async function fetchSavedPoints() {
   // TIP: annotatedCanvas is a reactive object past to the canvas component, so annotatedCanvas = [] replace it and breaks reactivity. This is a workaround:
   annotatedCanvas.length = 0;
@@ -96,6 +100,7 @@ async function fetchSavedPoints() {
           @annotate="annotate"
           @view="isAnnotationDisplayed = !isAnnotationDisplayed"
           @recalibrate=""
+          @record="record"
           :isAnnotationDisplayed="isAnnotationDisplayed"
           :appState="appState"
         />

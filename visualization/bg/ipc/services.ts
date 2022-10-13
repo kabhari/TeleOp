@@ -25,6 +25,14 @@ export default class ServicesIPC implements IServicesIPC {
     await coordinate.save();
   }
 
+  async record(): Promise<boolean> {
+    if (AppContext.isRecording === undefined) {
+      AppContext.isRecording = false;
+    }
+    AppContext.isRecording = !AppContext.isRecording;
+    return true;
+  }
+
   // return all the annotated points that belongs to current session
   async view(): Promise<ICoordinateSaved[]> {
     const session_id = AppContext.session._id;

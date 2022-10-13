@@ -17,9 +17,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div
-    class="flex flex-col flex-grow w-40 flex-grow flex flex-col justify-content h-96"
-  >
+  <div class="flex flex-col flex-grow w-40 flex-grow flex flex-col justify-content h-96">
     <a
       href="#"
       class="panel-item"
@@ -31,11 +29,7 @@ const props = defineProps<{
     </a>
 
     <a>
-      <a
-        v-if="appState == AppState.CALIBRATING"
-        class="panel-item disabled"
-        href="#"
-      >
+      <a v-if="appState == AppState.CALIBRATING" class="panel-item disabled" href="#">
         <IconCalibrating /> Calibrating
       </a>
       <a
@@ -62,10 +56,10 @@ const props = defineProps<{
       {{ isAnnotationDisplayed ? "Hide" : "Show" }}
     </a>
 
-    <a
-      href="#"
-      class="panel-item"
-      :class="{ disabled: appState != AppState.STREAMING }"
+    <a 
+      href="#" class="panel-item" 
+      :class="{ enabled: appState != AppState.STREAMING }"
+      @click="$emit('record')"
     >
       <IconCamera /> Record
     </a>

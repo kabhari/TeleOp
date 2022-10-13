@@ -27,16 +27,18 @@ class mock_data_generator:
 
     def __init__(self):
         for i in range(16):
-            img = Image.open(f'mock/{i}.png')
+            img = Image.open(f"mock/{i}.png")
             img_buffer = BytesIO()
             img.save(img_buffer, "PNG")
             self.frames.append(img_buffer)
 
     def coordinate(self, data_rate):
-        self.alpha += 5/data_rate
-        self.r += 0.5/data_rate
+        self.alpha += 5 / data_rate
+        self.r += 0.5 / data_rate
         return generate_random_pnt_circle(10 * math.sin(self.r), 0, 0, self.alpha)
 
     def frame(self):
-        self.frameIndex = 0 if self.frameIndex > len(self.frames)-2 else  self.frameIndex + 1
+        self.frameIndex = (
+            0 if self.frameIndex > len(self.frames) - 2 else self.frameIndex + 1
+        )
         return self.frames[self.frameIndex]
