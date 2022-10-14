@@ -135,7 +135,9 @@ export class VideoEvent {
     }
   }
 
-  static async import_video_from_s3(s3_zip_data: string) {
+  static async import_video_from_s3(
+    s3_zip_data: string
+  ): Promise<Array<Buffer>> {
     // Grab the sister file containing the frames buffer size
     let frame_buffer_size_file = await S3Funcs.download_from_s3(
       this._s3_main_bucket,
@@ -174,5 +176,7 @@ export class VideoEvent {
       "unconcat which should match with original data: ",
       JSON.parse(JSON.stringify(unconcat))
     );
+
+    return unconcat;
   }
 }

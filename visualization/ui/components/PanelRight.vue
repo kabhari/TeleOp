@@ -64,7 +64,7 @@ const open = ref(false);
                       <a class="panel-item" href="#"
                         ><SettingIcon /> Settings</a
                       >
-                      <a class="panel-item" href="#"
+                      <a class="panel-item" href="#" @click="$emit('play_back')"
                         ><FolderIcon /> Recordings</a
                       >
                     </div>

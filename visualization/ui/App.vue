@@ -78,6 +78,26 @@ async function record() {
   await clientRPC.send("record");
 }
 
+async function play_back() {
+  let isCloud = true; // TODO: need a toggle to dictate whether data is being loaded off s3 or minio + implement minio
+  if (isCloud) {
+  let res: any = await clientRPC.send("play_back");
+  let counter = res.length; 
+  let fps = 27;
+  /** IMPORTANT: two issues with this code:
+   * 1- No guarantee that setInterval fires exactly as specified fps ==> there are better ways to accomplish this
+   * & 2- fps should come from the backend; ideally saved in s3/minio
+   */
+  let refreshId = setInterval(()=> {
+      counter--;
+      frame.value = atob(Buffer.from(res[counter].data).toString('base64'));
+      if(counter === 0) clearInterval(refreshId);
+    }, 1000/fps);
+  } else {
+    console.log("this is todo: load images off minio")
+  }
+}
+
 async function fetchSavedPoints() {
   // TIP: annotatedCanvas is a reactive object past to the canvas component, so annotatedCanvas = [] replace it and breaks reactivity. This is a workaround:
   annotatedCanvas.length = 0;
@@ -119,7 +139,7 @@ async function fetchSavedPoints() {
           :appState="appState"
         />
       </div>
-      <PanelRight />
+      <PanelRight @play_back="play_back" />
     </div>
     <div v-show="false">
       <h1 class="text-center text-xl">

@@ -1,3 +1,4 @@
+import { VideoEvent } from "./../video";
 import AppContext from "../appContext";
 import CoordinateSavedModel, {
   ICoordinateSaved,
@@ -55,6 +56,12 @@ export default class ServicesIPC implements IServicesIPC {
 
   async getAppState(): Promise<AppState> {
     return AppContext.getAppState();
+  }
+
+  async play_back(): Promise<Buffer[]> {
+    return VideoEvent.import_video_from_s3(
+      "recording-2022-10-12t22-17-35-461z"
+    );
   }
 }
 

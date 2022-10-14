@@ -1,7 +1,5 @@
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
-app.commandLine.appendSwitch('enable-features','SharedArrayBuffer')
-
 const isDev = process.env.IS_DEV == "true" ? true : false;
 
 let { fork } = require('child_process')
