@@ -182,8 +182,8 @@ export default class CanvasDrawer {
     return [quad_one, quad_two, quad_three, quad_four];
   }
 
-  clear() {
+  clear(isGrid: Boolean) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.drawGrid(this._padding, this.canvas_h, this.canvas_w);
+    if (isGrid) this.drawGrid(this._padding, this.canvas_h, this.canvas_w);
   }
 }

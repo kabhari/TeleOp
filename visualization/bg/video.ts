@@ -155,9 +155,6 @@ export class VideoEvent {
       s3_zip_data
     );
 
-    console.log("polo", frame_buffer_size_file);
-    console.log("yolo", zip_file_buffer);
-
     // inflate
     const unzipped = zlib.inflateRawSync(zip_file_buffer);
 

@@ -10,7 +10,7 @@ export interface IServicesIPC {
   view(): Promise<Array<ICoordinateSaved>>;
   calibrate(quad: number): Promise<Boolean>;
   getAppState(): Promise<AppState>;
-  play_back(): Promise<Array<Buffer>>;
+  playBack(): Promise<Array<Buffer>>;
 }
 
 export interface IPushIPC {

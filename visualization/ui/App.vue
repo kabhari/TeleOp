@@ -22,6 +22,7 @@ let frame = ref<any>();
 let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
+let isCloud : Boolean = false;
 let labelCount = 0;
 let appState = ref<AppState>(AppState.WAITING_IPC);
 
@@ -44,6 +45,11 @@ onMounted(() => {
   addPushListeners();
   getAppState();
 });
+
+
+const cloudToggle = (val: Boolean) => {
+  isCloud = val;
+}
 
 async function getAppState() {
   const state = (await clientRPC.send("getAppState")) as AppState;
@@ -78,32 +84,37 @@ async function record() {
   await clientRPC.send("record");
 }
 
-async function play_back() {
-  let isCloud = true; // TODO: need a toggle to dictate whether data is being loaded off s3 or minio + implement minio
+async function playBack() { 
   if (isCloud) {
-  let res: any = await clientRPC.send("play_back");
-  let counter = res.length; 
-  let fps = 27;
-  /** IMPORTANT: two issues with this code:
-   * 1- No guarantee that setInterval fires exactly as specified fps ==> there are better ways to accomplish this
-   * & 2- fps should come from the backend; ideally saved in s3/minio
-   */
-  let refreshId = setInterval(()=> {
+    let res: any = await clientRPC.send("playBack");
+    let counter = res.length;
+    let fps = 20;
+    /** IMPORTANT: two issues with this code:
+     * 1- No guarantee that setInterval fires exactly as specified fps ==> there are better ways to accomplish this
+     * & 2- fps should come from the backend; ideally saved in s3/minio
+     */
+    let refreshId = setInterval(() => {
       counter--;
-      frame.value = atob(Buffer.from(res[counter].data).toString('base64'));
-      if(counter === 0) clearInterval(refreshId);
-    }, 1000/fps);
+      frame.value = atob(Buffer.from(res[counter].data).toString("base64"));
+      if (counter === 0) clearInterval(refreshId);
+    }, 1000 / fps);
   } else {
-    console.log("this is todo: load images off minio")
+    console.log("minio to do");
   }
+}
+
+async function openMinio() {
+  window.open(
+    "http://" + import.meta.env.VITE_MINIO_ENDPOINT, //TODO: review after dockerized
+    "_blank",
+    "width=1024, height=800, nodeIntegration=no"
+  );
 }
 
 async function fetchSavedPoints() {
   // TIP: annotatedCanvas is a reactive object past to the canvas component, so annotatedCanvas = [] replace it and breaks reactivity. This is a workaround:
   annotatedCanvas.length = 0;
-  const listSavedPoints = (await clientRPC.send(
-    "view"
-  )) as Array<ICoordinateSaved>;
+  const listSavedPoints = (await clientRPC.send("view")) as Array<ICoordinateSaved>;
 
   listSavedPoints.forEach((savedPoint) => {
     annotatedCanvas.push(savedPoint);
@@ -126,20 +137,28 @@ async function fetchSavedPoints() {
         />
       </div>
       <div id="body_main" style="width: 500; height: 500">
+        <Canvas
+          ref="CanvasComponent"
+          :data="dataCanvas"
+          :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
+          :appState="appState"
+          :is_grid="true"
+        />
+      </div>
+      <div>
         <img
           v-if="frame"
           style="width: 300px; height: 300px; margin: 100px"
           class="absolute opacity-30"
           v-bind:src="'data:image/jpeg;base64,' + frame"
         />
-        <Canvas
-          ref="CanvasComponent"
-          :data="dataCanvas"
-          :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
-          :appState="appState"
-        />
+        <Canvas ref="VideoCanvasComponent" :is_grid="false" />
       </div>
-      <PanelRight @play_back="play_back" />
+      <PanelRight 
+        @play_back="playBack" 
+        @open_minio="openMinio" 
+        @cloud_toggle="cloudToggle" 
+      />
     </div>
     <div v-show="false">
       <h1 class="text-center text-xl">

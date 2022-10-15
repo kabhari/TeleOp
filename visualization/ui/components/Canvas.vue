@@ -11,6 +11,7 @@ const props = defineProps<{
   data: ICoordinate;
   annotation: Array<ICoordinateSaved>;
   appState: AppState;
+  is_grid: Boolean;
 }>();
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
@@ -32,9 +33,9 @@ onMounted(() => {
   const ctxBase = canvas.value?.getContext("2d");
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
-    ctx.clear();
+    ctx.clear(props.is_grid);
     setInterval(() => {
-      ctx.clear();
+      ctx.clear(props.is_grid);
       if (props.appState === AppState.STREAMING) {
         drawStream(ctx);
         if (props.annotation) {
