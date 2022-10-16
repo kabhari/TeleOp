@@ -22,7 +22,7 @@ let frame = ref<any>();
 let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
-let isCloud : Boolean = false;
+let isCloud: Boolean = false;
 let labelCount = 0;
 let appState = ref<AppState>(AppState.WAITING_IPC);
 
@@ -84,23 +84,31 @@ async function record() {
   await clientRPC.send("record");
 }
 
-async function playBack() { 
-  if (isCloud) {
-    let res: any = await clientRPC.send("playBack");
-    let counter = res.length;
-    let fps = 20;
-    /** IMPORTANT: two issues with this code:
-     * 1- No guarantee that setInterval fires exactly as specified fps ==> there are better ways to accomplish this
-     * & 2- fps should come from the backend; ideally saved in s3/minio
-     */
-    let refreshId = setInterval(() => {
-      counter--;
-      frame.value = atob(Buffer.from(res[counter].data).toString("base64"));
-      if (counter === 0) clearInterval(refreshId);
-    }, 1000 / fps);
-  } else {
-    console.log("minio to do");
+async function playBack() {
+  let res: any = await clientRPC.send("playBack",
+    {
+      zipFile: "recording-2022-10-15t21-20-13-993z",
+      isCloud: isCloud
+    });
+  let counter = res.length;
+  // TODO fps should come from the backend; ideally saved in s3/minio
+  let fps = 20;
+  let previousTimeStamp: any;
+
+  function step(timestamp: any) {
+    counter--;
+
+    if (previousTimeStamp !== undefined &&
+      previousTimeStamp - timestamp < 1000 / fps) {
+      frame.value = atob(Buffer.from(res[counter].data).toString("base64"))
+    }
+    if (counter > 0) {
+      window.requestAnimationFrame(step);
+    }
+
+    previousTimeStamp = timestamp;
   }
+  window.requestAnimationFrame(step);
 }
 
 async function openMinio() {
@@ -127,46 +135,23 @@ async function fetchSavedPoints() {
     {{ appState }}
     <div id="body" class="grow flex justify-center items-center gap-8">
       <div id="toolbar_left">
-        <PanelLeft
-          @annotate="annotate"
-          @view="isAnnotationDisplayed = !isAnnotationDisplayed"
-          @recalibrate=""
-          @record="record"
-          :isAnnotationDisplayed="isAnnotationDisplayed"
-          :appState="appState"
-        />
+        <PanelLeft @annotate="annotate" @view="isAnnotationDisplayed = !isAnnotationDisplayed" @recalibrate=""
+          @record="record" :isAnnotationDisplayed="isAnnotationDisplayed" :appState="appState" />
       </div>
       <div id="body_main" style="width: 500; height: 500">
-        <Canvas
-          ref="CanvasComponent"
-          :data="dataCanvas"
-          :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
-          :appState="appState"
-          :is_grid="true"
-        />
+        <Canvas ref="CanvasComponent" :data="dataCanvas" :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
+          :appState="appState" :is_grid="true" />
       </div>
       <div>
-        <img
-          v-if="frame"
-          style="width: 300px; height: 300px; margin: 100px"
-          class="absolute opacity-30"
-          v-bind:src="'data:image/jpeg;base64,' + frame"
-        />
+        <img v-if="frame" style="width: 300px; height: 300px; margin: 100px" class="absolute opacity-30"
+          v-bind:src="'data:image/jpeg;base64,' + frame" />
         <Canvas ref="VideoCanvasComponent" :is_grid="false" />
       </div>
-      <PanelRight 
-        @play_back="playBack" 
-        @open_minio="openMinio" 
-        @cloud_toggle="cloudToggle" 
-      />
+      <PanelRight @play_back="playBack" @open_minio="openMinio" @cloud_toggle="cloudToggle" />
     </div>
     <div v-show="false">
       <h1 class="text-center text-xl">
-        <input
-          type="text"
-          v-model="annotationLabel"
-          placeholder="Enter annotation label"
-        />
+        <input type="text" v-model="annotationLabel" placeholder="Enter annotation label" />
       </h1>
     </div>
     <div id="footer">

@@ -14,9 +14,12 @@ interface ObjectFromStorage {
   headers(): Promise<OutgoingHttpHeaders>;
 }
 
+/****************************
+ * MINIO
+ ****************************/
 export class MinioFuncs {
   // create a bucket
-  public static async create_bucket(
+  public static async createBucket(
     client: Minio.Client,
     bucket_suffix: string,
     region: string,
@@ -70,45 +73,28 @@ export class MinioFuncs {
   }
 
   // read an object
-  public static read(
+  public static async read(
     client: Minio.Client,
     bucket: string,
     filename: string
-  ): ObjectFromStorage {
-    return {
-      createStream: () => {
-        return new Promise((resolve, reject) => {
-          return client.getObject(
-            bucket,
-            filename,
-            (err: any, dataStream: Stream) => {
-              if (err) {
-                console.error(err);
-                return reject("Encountered Error while getting file");
-              }
-              return resolve(dataStream);
-            }
-          );
+  ): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      let buffArray: Array<Buffer> = [];
+      client.getObject(bucket, filename, (err, dataStream) => {
+        if (err) {
+          return console.log(err);
+        }
+        dataStream.on("data", function (chunk) {
+          buffArray.push(chunk);
         });
-      },
-      headers: async () => {
-        const stat: any = await new Promise((resolve, reject) => {
-          return client.statObject(bucket, filename, (err: any, stat: any) => {
-            if (err) {
-              reject(err);
-            }
-            return resolve(stat);
-          });
+        dataStream.on("end", function () {
+          resolve(Buffer.concat(buffArray));
         });
-
-        return {
-          "Content-Type": stat.metaData["content-type"],
-          "Content-Encoding": stat.metaData["content-encoding"],
-          "Cache-Control": stat.metaData["cache-control"],
-          "Content-Length": stat.size,
-        };
-      },
-    };
+        dataStream.on("error", function (err) {
+          reject(err);
+        });
+      });
+    });
   }
 
   // delete an object
@@ -130,7 +116,7 @@ export class MinioFuncs {
   }
 
   // copy an object from minio to s3
-  public static async mirror_to_s3(
+  public static async mirrorToS3(
     bucket: string,
     filename: string,
     data: Buffer | string
@@ -147,11 +133,14 @@ export class MinioFuncs {
     };
     const s3 = new S3Client(s3Configuration);
     const success = await s3.send(new PutObjectCommand(uploadParams));
+
+    // close connection
+    s3.destroy();
     return true; // need refactoring to return based on `success`
   }
 
   // list objects in a bucket
-  public static list_objects(
+  public static listObjects(
     client: Minio.Client,
     bucket: string,
     prefix?: string | undefined,
@@ -161,8 +150,11 @@ export class MinioFuncs {
   }
 }
 
+/****************************
+ * S3
+ ****************************/
 export class S3Funcs {
-  public static async download_from_s3(
+  public static async downloadFile(
     bucket: string,
     filename: string
   ): Promise<Buffer> {
@@ -182,7 +174,12 @@ export class S3Funcs {
     return new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       stream.on("data", (chunk) => chunks.push(chunk));
-      stream.once("end", () => resolve(Buffer.concat(chunks)));
+      stream.once("end", () => {
+        // shutdown s3
+        s3.destroy();
+        // resolve
+        resolve(Buffer.concat(chunks));
+      });
       stream.once("error", reject);
     });
 

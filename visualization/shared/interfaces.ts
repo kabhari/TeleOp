@@ -10,11 +10,16 @@ export interface IServicesIPC {
   view(): Promise<Array<ICoordinateSaved>>;
   calibrate(quad: number): Promise<Boolean>;
   getAppState(): Promise<AppState>;
-  playBack(): Promise<Array<Buffer>>;
+  playBack(playBack: IPlayBack): Promise<Array<Buffer>>;
 }
 
 export interface IPushIPC {
   streamCoordinate(coordinate: ICoordinate): void;
   streamVideo(video: StreamVideoRequest): void;
   pushAppState(appState: AppState): void;
+}
+
+export interface IPlayBack {
+  zipFile: string;
+  isCloud: Boolean;
 }

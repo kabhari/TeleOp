@@ -5,17 +5,18 @@ import fs from "fs";
 import { MinioFuncs, S3Funcs } from "./data/storage/functions";
 import MinioClient from "./data/storage/client";
 import { BucketItem } from "minio";
+import { pipeline } from "node:stream";
 
 export class VideoEvent {
   private static _create_bucket: boolean = true;
   private static _bucket: string; // bucket name
   private static _minio_client = MinioClient.getMinioClient;
-  private static _s3_main_bucket: string = "cathpilot-minio-bucket-test"; // s3 main bucket containing all data
+  private static _zip_bucket: string = "cathpilot-bucket-test"; // s3 main bucket containing all data
   private static _BUCKETS_REGION = process.env["BUCKETS_REGION"]!;
   private static _recordings_bucket_prefix = "recording";
   private static _recordings_file_prefix = "image";
-  private static _minio_zipfile_prefix = "zipped";
-  private static _frames_buffer_size_file_suffix = "frames_buffer_size";
+  private static _zipfile_suffix = "_zipped";
+  private static _frames_buffer_size_file_suffix = "_frames_buffer_size";
 
   static async manageVideoRecording(req: StreamVideoRequest) {
     // Recording started
@@ -26,7 +27,7 @@ export class VideoEvent {
         // the correct way to handle this is to set isRecording to `undefined`
         AppContext.isRecording = undefined;
         console.log("Recording started!");
-        this._bucket = await MinioFuncs.create_bucket(
+        this._bucket = await MinioFuncs.createBucket(
           this._minio_client,
           this._recordings_bucket_prefix,
           this._BUCKETS_REGION,
@@ -61,7 +62,7 @@ export class VideoEvent {
 
       // Stream data from the bucket
       // First list all the files
-      const files_stream = MinioFuncs.list_objects(
+      const files_stream = MinioFuncs.listObjects(
         this._minio_client,
         this._bucket,
         "",
@@ -80,16 +81,9 @@ export class VideoEvent {
             this._minio_client,
             this._bucket,
             files[file_key].name
-          )
-            .createStream()
-            .then((obj_stream) => {
-              obj_stream.on("data", (obj: Buffer) => {
-                objects.push(obj);
-              });
-              obj_stream.on("error", (err) => {
-                console.error(err);
-              });
-            });
+          ).then((obj) => {
+            objects.push(obj);
+          });
         }
         console.log("Minio data is read successfully!");
 
@@ -100,9 +94,9 @@ export class VideoEvent {
         // Upload the compressed data to Minio
         MinioFuncs.create(
           this._minio_client,
-          this._bucket,
+          this._zip_bucket,
           this._BUCKETS_REGION,
-          this._minio_zipfile_prefix + "_" + this._bucket,
+          this._bucket + this._zipfile_suffix,
           data_zipped,
           false, // note: if set to false, each object will replace the old one because it has the same name
           data_zipped.length,
@@ -114,20 +108,33 @@ export class VideoEvent {
         console.log("Zipped data uploaded to Minio!");
 
         // Upload the compressed data to S3
-        MinioFuncs.mirror_to_s3(
-          this._s3_main_bucket,
-          this._bucket,
+        MinioFuncs.mirrorToS3(
+          this._zip_bucket,
+          this._bucket + this._zipfile_suffix,
           data_zipped
         );
         console.log("Zipped data uploaded to S3!");
 
-        // upload frame sizes to s3, this is necessary for knowing where frames end in the buffer
+        // upload frame sizes to both minio & s3, this is necessary for knowing where frames end in the buffer
         objects.forEach((o) => {
           frames_buffer_size.push(o.length);
         });
-        MinioFuncs.mirror_to_s3(
-          this._s3_main_bucket,
-          this._bucket + "_" + this._frames_buffer_size_file_suffix,
+
+        // minio
+        MinioFuncs.create(
+          this._minio_client,
+          this._zip_bucket,
+          this._BUCKETS_REGION,
+          this._bucket + this._frames_buffer_size_file_suffix,
+          frames_buffer_size.toString(),
+          false // note: if set to false, each object will replace the old one because it has the same name
+        );
+        console.log("Frame buffer sizes uploaded to Minio!");
+
+        // s3
+        MinioFuncs.mirrorToS3(
+          this._zip_bucket,
+          this._bucket + this._frames_buffer_size_file_suffix,
           frames_buffer_size.toString()
         );
         console.log("Frame buffer sizes uploaded to s3!");
@@ -135,44 +142,65 @@ export class VideoEvent {
     }
   }
 
-  static async import_video_from_s3(
-    s3_zip_data: string
+  static async importVideoFromStorage(
+    zipData: string,
+    isCloud: Boolean = false
   ): Promise<Array<Buffer>> {
-    // Grab the sister file containing the frames buffer size
-    let frame_buffer_size_file = await S3Funcs.download_from_s3(
-      this._s3_main_bucket,
-      s3_zip_data + "_" + this._frames_buffer_size_file_suffix
-    );
+    let zip_file_buffer: any;
+    let frame_buffer_size_file: any;
+    let buffer_size_filename = zipData + this._frames_buffer_size_file_suffix;
+    let zip_file_name = zipData + this._zipfile_suffix;
 
+    if (isCloud) {
+      // s3
+      console.log("Reading data from the cloud");
+      // Grab the zip file off s3
+      zip_file_buffer = await S3Funcs.downloadFile(
+        this._zip_bucket,
+        zip_file_name
+      );
+
+      // Grab the corresponfing file containing the frames buffer size
+      frame_buffer_size_file = await S3Funcs.downloadFile(
+        this._zip_bucket,
+        buffer_size_filename
+      );
+    } else {
+      // minio
+      console.log("Reading data from the disk");
+      // Grab the zip file off minio
+      await MinioFuncs.read(
+        this._minio_client,
+        this._zip_bucket,
+        zip_file_name
+      ).then((obj) => {
+        zip_file_buffer = obj;
+      });
+
+      // Grab the corresponfing file containing the frames buffer size
+      await MinioFuncs.read(
+        this._minio_client,
+        this._zip_bucket,
+        buffer_size_filename
+      ).then((obj) => {
+        frame_buffer_size_file = obj;
+      });
+    }
     let video_frames_buffer_size = frame_buffer_size_file
       .toString()
       .split(",")
       .map(Number);
 
-    // Grab the zip file off s3
-    let zip_file_buffer = await S3Funcs.download_from_s3(
-      this._s3_main_bucket,
-      s3_zip_data
-    );
-
     // inflate
     const unzipped = zlib.inflateRawSync(zip_file_buffer);
-
-    console.log("unzipped: ", unzipped);
     let start_index = 0;
     let unconcat: Array<Buffer> = [];
     for (let i = 0; i < video_frames_buffer_size.length; i++) {
       unconcat.push(
         unzipped.slice(start_index, video_frames_buffer_size[i] + start_index)
-        // unzipped.slice(start_index, objects[i].length + start_index)
       );
       start_index += video_frames_buffer_size[i];
-      // start_index += objects[i].length;
     }
-    console.log(
-      "unconcat which should match with original data: ",
-      JSON.parse(JSON.stringify(unconcat))
-    );
 
     return unconcat;
   }

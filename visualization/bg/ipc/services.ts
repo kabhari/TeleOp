@@ -3,7 +3,7 @@ import AppContext from "../appContext";
 import CoordinateSavedModel, {
   ICoordinateSaved,
 } from "../data/models/coordinatesaved.model";
-import { IServicesIPC } from "../../shared/Interfaces";
+import { IServicesIPC, IPlayBack } from "../../shared/Interfaces";
 import { AppState } from "../../shared/Enums";
 import { CalibrationEvent } from "../calibration";
 
@@ -58,9 +58,10 @@ export default class ServicesIPC implements IServicesIPC {
     return AppContext.getAppState();
   }
 
-  async playBack(): Promise<Buffer[]> {
-    return VideoEvent.import_video_from_s3(
-      "recording-2022-10-12t22-17-35-461z"
+  async playBack(playBack: IPlayBack): Promise<Buffer[]> {
+    return VideoEvent.importVideoFromStorage(
+      playBack.zipFile,
+      playBack.isCloud
     );
   }
 }
