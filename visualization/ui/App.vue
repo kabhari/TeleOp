@@ -87,7 +87,7 @@ async function record() {
 async function playBack() {
   let res: any = await clientRPC.send("playBack",
     {
-      zipFile: "recording-2022-10-15t21-20-13-993z",
+      zipFile: "recording-2022-10-15t19-56-17-204z",
       isCloud: isCloud
     });
   let counter = res.length;

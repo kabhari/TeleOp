@@ -1,7 +1,7 @@
 import { connect } from "mongoose";
 import "dotenv/config";
 import AppContext from "./appContext";
-import MinioClient from "./data/storage/client";
+import { MinioClient } from "./data/storage/client";
 
 async function run_bg() {
   const appContext = AppContext.getInstance();
