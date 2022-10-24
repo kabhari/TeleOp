@@ -48,7 +48,7 @@ def stream_video_logic():
         # stamp the data with current date + time
         timestamp.FromDatetime(datetime.datetime.now())
 
-        data = base64.b64encode(mock_data.frame().getvalue())
+        data = base64.b64encode(mock_data.frame().getvalue()) # change THIS
 
         # SEND COORDINATION HERE --------------------------------------------------------------
         # construct the message
@@ -94,7 +94,7 @@ def stream_coordinations_logic():
 
         # SEND COORDINATION HERE --------------------------------------------------------------
         # construct the message
-        xy = mock_data.coordinate(DATA_RATE_COORDINATIONS)
+        xy = mock_data.coordinate(DATA_RATE_COORDINATIONS) # Replace method HERE
         msg = coordinate_pb2.StreamCoordinateRequest(
             x=xy[0],
             y=xy[1],
@@ -115,7 +115,6 @@ calibrated_quads = [False, False,  False,  False]
 def is_calibrated():
     return calibrated_quads[0] and calibrated_quads[1] and calibrated_quads[2] and calibrated_quads[3]
 # CALIBRATION PARAMETERS AND END CONDITION --------------------------------------------------------------
-
 
 def run():
     """Create  the client"""
