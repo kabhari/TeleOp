@@ -13,6 +13,7 @@ let toggleCalibrate = ref<boolean>(true);
 const props = defineProps<{
   isAnnotationDisplayed: boolean;
   appState: AppState;
+  isOverlaid: boolean;
 }>();
 </script>
 
@@ -56,12 +57,31 @@ const props = defineProps<{
       {{ isAnnotationDisplayed ? "Hide" : "Show" }}
     </a>
 
-    <a 
-      href="#" class="panel-item" 
+    <a
+      href="#"
+      class="panel-item"
       :class="{ enabled: appState != AppState.STREAMING }"
       @click="$emit('record')"
     >
       <IconCamera /> Record
+    </a>
+
+    <a
+      class="panel-item"
+      href="#"
+      @click="$emit('overlay')"
+    >
+      <IconEyeOn v-if="isOverlaid" />
+      <IconEyeOff v-else />
+      {{ isOverlaid ? "Overlay:Off" : "Overlay:On" }}
+    </a>
+
+    <a 
+     class="panel-item"
+     href="#"
+     @click="$emit('snapshot')"
+    >
+    <IconCamera /> Snapshot
     </a>
   </div>
 </template>

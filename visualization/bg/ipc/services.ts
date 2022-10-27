@@ -1,4 +1,5 @@
-import { VideoEvent } from "./../video";
+import { ISnapshot } from './../../shared/interfaces';
+import { VideoEvent, ImageEvent } from "../video";
 import AppContext from "../appContext";
 import CoordinateSavedModel, {
   ICoordinateSaved,
@@ -31,7 +32,7 @@ export default class ServicesIPC implements IServicesIPC {
       AppContext.isRecording = false;
     }
     AppContext.isRecording = !AppContext.isRecording;
-    return true;
+    return true; // todo: return based on the state
   }
 
   // return all the annotated points that belongs to current session
@@ -61,8 +62,17 @@ export default class ServicesIPC implements IServicesIPC {
   async playBack(playBack: IPlayBack): Promise<Buffer[]> {
     return VideoEvent.importVideoFromStorage(
       playBack.zipFile,
-      playBack.isCloud
+      playBack.isCloud,
+      playBack.isDisk
     );
+  }
+
+  async snapshot(snap: ISnapshot): Promise<void> { // todo: return state as boolean
+    let buff = Buffer.from(snap.imageFile, 'base64');
+    ImageEvent.exportImageToStorage(
+      buff, 
+      snap.isCloud,
+      snap.isDisk);
   }
 }
 

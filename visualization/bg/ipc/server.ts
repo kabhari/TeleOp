@@ -1,4 +1,4 @@
-import { ICoordinate } from "./../data/models/coordinates.model";
+import { ICoordinate } from "../data/models/coordinates.model";
 import ipc from "node-ipc";
 import ServicesIPC from "./services";
 import { AppState, IPCResponseType } from "../../shared/Enums";

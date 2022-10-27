@@ -106,13 +106,15 @@ export class MinioFuncs {
     bucket: string,
     filename: string,
     data: Buffer | string,
-    s3: S3Client
+    s3: S3Client,
+    contentType?: string
   ): Promise<boolean> {
     // Set the parameters
     let uploadParams = {
       Bucket: bucket,
       Key: filename,
       Body: data,
+      ContentType: contentType
     };
     const success = await s3.send(new PutObjectCommand(uploadParams));
     return true; // need refactoring to return based on `success`
@@ -198,7 +200,7 @@ export class StorageHelper {
         false, // note: if set to false, each object will replace the old one because it has the same name
         data_zipped.length,
         {
-          "Content-Type": "zip",
+          "Content-Type": "application/gzip",
           recording: true,
         }
       );
@@ -217,7 +219,12 @@ export class StorageHelper {
 
     if (isCloud) {
       // Upload the compressed data to S3
-      MinioFuncs.mirrorToS3(zipBucket, zipFilename, data_zipped, s3Client);
+      MinioFuncs.mirrorToS3(
+        zipBucket, 
+        zipFilename, 
+        data_zipped, 
+        s3Client,
+        'application/gzip');
       console.log("Zipped data uploaded to S3!");
 
       // Upload frame sizes to S3
@@ -225,7 +232,8 @@ export class StorageHelper {
         zipBucket,
         buffSizeFilename,
         frames_buffer_size.toString(),
-        s3Client
+        s3Client,
+        'application/gzip'
       );
       console.log("Frame buffer sizes uploaded to s3!");
     }
@@ -233,6 +241,10 @@ export class StorageHelper {
     return true;
   }
 
+  /* Since it doesn't make sense to read off both cloud and disk, 
+   * the idea here is that it tries to read off cloud if cloud toggle is on
+   * otherwise it defaults to disk assuming disk toggle is on 
+   * otherwise returns empty buffer */
   public static async unzipAndReturn(
     zipBucket: string,
     zipFilename: string,
@@ -278,6 +290,7 @@ export class StorageHelper {
     } else {
       // both isCloud and isDisk === false!
       console.warn("Please select either disk or cloud to download data.");
+      return [];
     }
 
     let video_frames_buffer_size = frameBufferFizeFile
@@ -297,5 +310,51 @@ export class StorageHelper {
     }
 
     return unconcat;
+  }
+
+  public static async uploadSingleFile(
+    bucket: string, 
+    filename: string,
+    data: any,
+    meta: Minio.ItemBucketMetadata,
+    isCloud: Boolean,
+    isDisk: Boolean,
+    minioClient: Minio.Client,
+    s3Client: S3Client,
+    contentType: string
+  ){
+    // TODO: Create a bucket if doesnt exist -- it's impossible in current case but has to be done to guarantee robustness
+    
+    // append timestamp to the filename to prevent overriding
+    const filenameWithTimestamp = utility.appendTimeToFilename(filename);
+    
+    if(isDisk) {
+    MinioFuncs.create(
+      minioClient,
+      bucket,
+      filenameWithTimestamp,
+      data,
+      false,
+      data.length,
+      meta
+    );
+    }
+
+    if(isCloud){
+      // Upload frame sizes to S3
+      MinioFuncs.mirrorToS3(
+        bucket,
+        filenameWithTimestamp,
+        data,
+        s3Client,
+        contentType
+      );
+    }
+
+    if(!isCloud && !isDisk) {
+      // both isCloud and isDisk === false!
+      console.warn("Please select either disk or cloud to download data.");
+      return;
+    }
   }
 }

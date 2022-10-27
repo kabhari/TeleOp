@@ -51,6 +51,7 @@ MINIO_SECRET_KEY=your_minio_secret_key
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 BUCKETS_REGION=us-east-2
+BUCKET_NAME=your_bucket_name
 ```
 
 For more information, you can always refer to `.env.template` files under `visualization` and `collection` directories.
@@ -61,7 +62,7 @@ Please refer to our [README file](visualization/bg/Data/README.md) for more info
 
 # Minio
 
-(In case of not using docket:) please download Minio Server and run it before firing the app.
+(In case of not using docker:) please download Minio Server and run it before firing the app.
 Example for Windows machine: `./minio.exe server ./`
 
 ## Tips

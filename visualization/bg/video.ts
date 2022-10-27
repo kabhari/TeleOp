@@ -1,5 +1,5 @@
-import { StreamVideoRequest } from "./../proto/coordinate";
-import AppContext from "./appContext";
+import { StreamVideoRequest } from "../proto/coordinate";
+import AppContext from "./appContext"
 import { MinioFuncs, S3Funcs, StorageHelper } from "./data/storage/functions";
 import { MinioClient, S3CloudClient } from "./data/storage/client";
 import { BucketItem } from "minio";
@@ -8,7 +8,7 @@ export class VideoEvent {
   private static _createBucket: boolean = true;
   private static _bucket: string; // bucket name
   private static _minioClient = MinioClient.getMinioClient;
-  private static _zipBucket: string = "cathpilot-bucket-test"; // s3 main bucket containing all data
+  private static _zipBucket = process.env["BUCKET_NAME"]!; // s3 & minio main bucket containing all blob data
   private static _BUCKETS_REGION = process.env["BUCKETS_REGION"]!;
   private static _recordingsBucketPrefix = "recording";
   private static _recordingsFilePrefix = "image";
@@ -42,7 +42,7 @@ export class VideoEvent {
           true, // must set to true or else each object will replace the old one because it has the same name
           req.data.length,
           {
-            "Content-Type": "png",
+            "Content-Type": "image/png",
             recording: true,
           }
         );
@@ -82,6 +82,8 @@ export class VideoEvent {
         }
         console.log("Minio data is read successfully!");
 
+        // TODO: For the time being, we upload this to both cloud and disk regardless of the FE toggles
+        // It's a very small file so shouldnt take much space
         StorageHelper.zipAndUpload(
           this._zipBucket,
           objects,
@@ -98,17 +100,45 @@ export class VideoEvent {
 
   static async importVideoFromStorage(
     zipData: string,
-    isCloud: Boolean = false
+    isCloud: Boolean = false,
+    isDisk: Boolean = true
   ): Promise<Array<Buffer>> {
     const res = StorageHelper.unzipAndReturn(
       this._zipBucket,
       zipData + this._zipfileSuffix,
       zipData + this._framesBuffSizeFileSuffix,
-      !isCloud,
+      isDisk,
       isCloud,
       MinioClient.getMinioClient,
       S3CloudClient.getS3Client
     );
     return res;
+  }
+}
+
+export class ImageEvent {
+
+  private static _imgBucket = process.env["BUCKET_NAME"] as string; // s3 main bucket containing all data
+  private static _imgFilename = "snapshot"
+
+  static async exportImageToStorage(
+    imageData: any, 
+    isCloud: Boolean, 
+    isDisk: Boolean) {
+    const contentType = "image/png";
+    StorageHelper.uploadSingleFile(
+      this._imgBucket,
+      this._imgFilename,
+      imageData, 
+      {
+        "Content-Type": contentType,
+        recording: true,
+      },
+      isCloud, 
+      isDisk, 
+      MinioClient.getMinioClient,
+      S3CloudClient.getS3Client,
+      contentType
+    )
   }
 }

@@ -22,7 +22,9 @@ let frame = ref<any>();
 let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
-let isCloud: Boolean = false;
+let isOverlaid = ref<boolean>(false);
+let isCloud = ref<boolean>(false);
+let isDisk = ref<boolean>(true);
 let labelCount = 0;
 let appState = ref<AppState>(AppState.WAITING_IPC);
 
@@ -46,9 +48,12 @@ onMounted(() => {
   getAppState();
 });
 
+const cloudToggle = (val: boolean) => {
+  isCloud.value = val;
+};
 
-const cloudToggle = (val: Boolean) => {
-  isCloud = val;
+const diskToggle = (val: boolean) => {
+  isDisk.value = val;
 }
 
 async function getAppState() {
@@ -85,11 +90,11 @@ async function record() {
 }
 
 async function playBack() {
-  let res: any = await clientRPC.send("playBack",
-    {
-      zipFile: "recording-2022-10-15t19-56-17-204z",
-      isCloud: isCloud
-    });
+  let res: any = await clientRPC.send("playBack", {
+    zipFile: "recording-2022-10-26t23-29-17-444z",
+    isCloud: isCloud.value,
+    isDisk: isDisk.value
+  });
   let counter = res.length;
   // TODO fps should come from the backend; ideally saved in s3/minio
   let fps = 20;
@@ -98,9 +103,8 @@ async function playBack() {
   function step(timestamp: any) {
     counter--;
 
-    if (previousTimeStamp !== undefined &&
-      previousTimeStamp - timestamp < 1000 / fps) {
-      frame.value = atob(Buffer.from(res[counter].data).toString("base64"))
+    if (previousTimeStamp !== undefined && previousTimeStamp - timestamp < 1000 / fps) {
+      frame.value = atob(Buffer.from(res[counter].data).toString("base64"));
     }
     if (counter > 0) {
       window.requestAnimationFrame(step);
@@ -109,6 +113,18 @@ async function playBack() {
     previousTimeStamp = timestamp;
   }
   window.requestAnimationFrame(step);
+}
+
+async function snapshot() {
+  // since canvas data is going to be tainted, toDataURL() method should be called from the child component
+  await CanvasComponent.value.getCanvasData('image/png').then(
+    async (res: any) => {
+      await clientRPC.send("snapshot", { 
+        imageFile: res.split(",")[1],
+        isCloud: isCloud.value,
+        isDisk: isDisk.value
+      });
+    });
 }
 
 async function openMinio() {
@@ -135,23 +151,54 @@ async function fetchSavedPoints() {
     {{ appState }}
     <div id="body" class="grow flex justify-center items-center gap-8">
       <div id="toolbar_left">
-        <PanelLeft @annotate="annotate" @view="isAnnotationDisplayed = !isAnnotationDisplayed" @recalibrate=""
-          @record="record" :isAnnotationDisplayed="isAnnotationDisplayed" :appState="appState" />
+        <PanelLeft
+          @annotate="annotate"
+          @view="isAnnotationDisplayed = !isAnnotationDisplayed"
+          @recalibrate=""
+          @record="record"
+          @overlay="isOverlaid = !isOverlaid"
+          @snapshot="snapshot"
+          :isAnnotationDisplayed="isAnnotationDisplayed"
+          :appState="appState"
+          :isOverlaid="isOverlaid"
+        />
       </div>
       <div id="body_main" style="width: 500; height: 500">
-        <Canvas ref="CanvasComponent" :data="dataCanvas" :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
-          :appState="appState" :is_grid="true" />
+        <Canvas
+          ref="CanvasComponent"
+          :data="dataCanvas"
+          :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
+          :appState="appState"
+          :is_grid="true"
+          :overlay_img="isOverlaid ? 'data:image/png;base64,' + frame : ''"
+          class="opacity-80"
+        />
       </div>
       <div>
-        <img v-if="frame" style="width: 300px; height: 300px; margin: 100px" class="absolute opacity-30"
-          v-bind:src="'data:image/jpeg;base64,' + frame" />
+        <img
+          v-if="frame"
+          style="width: 500px; height: 500px; margin: 0px"
+          class="absolute opacity-100"
+          v-bind:src="'data:image/png;base64,' + frame"
+        /> 
         <Canvas ref="VideoCanvasComponent" :is_grid="false" />
       </div>
-      <PanelRight @play_back="playBack" @open_minio="openMinio" @cloud_toggle="cloudToggle" />
+      <PanelRight
+        @play_back="playBack"
+        @open_minio="openMinio"
+        @cloud_toggle="cloudToggle"
+        @disk_toggle="diskToggle"
+        :cloud_value="isCloud"
+        :disk_value="isDisk"
+      />
     </div>
     <div v-show="false">
       <h1 class="text-center text-xl">
-        <input type="text" v-model="annotationLabel" placeholder="Enter annotation label" />
+        <input
+          type="text"
+          v-model="annotationLabel"
+          placeholder="Enter annotation label"
+        />
       </h1>
     </div>
     <div id="footer">

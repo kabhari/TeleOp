@@ -14,6 +14,12 @@ import FolderIcon from "../assets/icons/folder.svg";
 import EyeIcon from "../assets/icons/eyeOn.svg";
 
 const open = ref(false);
+
+const props = defineProps<{
+  cloud_value: boolean;
+  disk_value: boolean;
+}>();
+
 </script>
 
 <template>
@@ -64,8 +70,17 @@ const open = ref(false);
                       <label class="relative flex justify-end items-center p-2 text-l">
                         Cloud
                         <input type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md" 
-                        :value="cloudValue"
+                        :checked="cloud_value"
                         @input="$emit('cloud_toggle', $event.target.checked)"/>
+                        <span class="w-14 h-8 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-6 after:h-6 after:bg-white after:rounded-full after:shadow-md after:duration-200 peer-checked:after:translate-x-6">
+                        </span>
+                      </label>
+                      <!-- toggle button -->
+                      <label class="relative flex justify-end items-center p-2 text-l">
+                        Disk
+                        <input type="checkbox" class="absolute left-1/2 -translate-x-1/2 w-full h-full peer appearance-none rounded-md" 
+                        :checked="disk_value"
+                        @input="$emit('disk_toggle', $event.target.checked)"/>
                         <span class="w-14 h-8 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-6 after:h-6 after:bg-white after:rounded-full after:shadow-md after:duration-200 peer-checked:after:translate-x-6">
                         </span>
                       </label>
