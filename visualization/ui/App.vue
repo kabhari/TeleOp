@@ -19,6 +19,7 @@ const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC insta
 let annotationLabel = ref<String>("");
 const CanvasComponent = ref<any>();
 let frame = ref<any>();
+let frameSnap : any;
 let dataCanvas = {} as ICoordinate;
 let annotatedCanvas = [] as Array<ICoordinateSaved>;
 let isAnnotationDisplayed = ref<boolean>(true);
@@ -156,7 +157,7 @@ async function fetchSavedPoints() {
           @view="isAnnotationDisplayed = !isAnnotationDisplayed"
           @recalibrate=""
           @record="record"
-          @overlay="isOverlaid = !isOverlaid"
+          @overlay="isOverlaid = !isOverlaid; frameSnap = frame"
           @snapshot="snapshot"
           :isAnnotationDisplayed="isAnnotationDisplayed"
           :appState="appState"
@@ -170,7 +171,7 @@ async function fetchSavedPoints() {
           :annotation="isAnnotationDisplayed ? annotatedCanvas : []"
           :appState="appState"
           :is_grid="true"
-          :overlay_img="isOverlaid ? 'data:image/png;base64,' + frame : ''"
+          :overlay_img="isOverlaid ? 'data:image/png;base64,' + frameSnap : ''"
           class="opacity-80"
         />
       </div>
