@@ -52,8 +52,7 @@ function createBackgroundWindow(socketName) {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
-        enableRemoteModule: true,
-        nodeIntegration: true,
+        enableRemoteModule: true
       }
     })
     win.loadURL(`file://${path.join(__dirname, '../dist/bg/server-dev.html')}`)

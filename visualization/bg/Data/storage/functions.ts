@@ -47,7 +47,7 @@ export class MinioFuncs {
     appendTime = false,
     size?: number,
     metadata?: Minio.ItemBucketMetadata
-  ): Promise<any> {
+  ): Promise<Minio.UploadedObjectInfo> {
     // save the data
     return await client.putObject(
       bucket,
@@ -68,7 +68,7 @@ export class MinioFuncs {
       let buffArray: Array<Buffer> = [];
       client.getObject(bucket, filename, (err, dataStream) => {
         if (err) {
-          return console.log(err);
+          throw new Error("An error occured in downloading the file from Minio")
         }
         dataStream.on("data", function (chunk) {
           buffArray.push(chunk);
@@ -108,7 +108,7 @@ export class MinioFuncs {
     data: Buffer | string,
     s3: S3Client,
     contentType?: string
-  ): Promise<boolean> {
+  ): Promise<void> {
     // Set the parameters
     let uploadParams = {
       Bucket: bucket,
@@ -116,8 +116,12 @@ export class MinioFuncs {
       Body: data,
       ContentType: contentType
     };
-    const success = await s3.send(new PutObjectCommand(uploadParams));
-    return true; // need refactoring to return based on `success`
+    try {
+      await s3.send(new PutObjectCommand(uploadParams)); 
+    } catch(e) {
+      if(e instanceof Error)
+        throw new Error (e.message);
+    }
   }
 
   // list objects in a bucket
@@ -255,7 +259,7 @@ export class StorageHelper {
     s3Client: S3Client
   ): Promise<Array<Buffer>> {
     let zipFileBuffer: any;
-    let frameBufferFizeFile: any;
+    let frameBufferSizeFile: any;
 
     if (isCloud) {
       // s3
@@ -268,7 +272,7 @@ export class StorageHelper {
       );
 
       // Grab the corresponfing file containing the frames buffer size
-      frameBufferFizeFile = await S3Funcs.downloadFile(
+      frameBufferSizeFile = await S3Funcs.downloadFile(
         zipBucket,
         buffSizeFilename,
         s3Client
@@ -277,23 +281,17 @@ export class StorageHelper {
       // minio
       console.log("Reading data from the disk");
       // Grab the zip file off minio
-      await MinioFuncs.read(minioClient, zipBucket, zipFilename).then((obj) => {
-        zipFileBuffer = obj;
-      });
+      zipFileBuffer = await MinioFuncs.read(minioClient, zipBucket, zipFilename);
 
       // Grab the corresponfing file containing the frames buffer size
-      await MinioFuncs.read(minioClient, zipBucket, buffSizeFilename).then(
-        (obj) => {
-          frameBufferFizeFile = obj;
-        }
-      );
+      frameBufferSizeFile = await MinioFuncs.read(minioClient, zipBucket, buffSizeFilename);
     } else {
       // both isCloud and isDisk === false!
       console.warn("Please select either disk or cloud to download data.");
       return [];
     }
 
-    let video_frames_buffer_size = frameBufferFizeFile
+    let video_frames_buffer_size = frameBufferSizeFile
       .toString()
       .split(",")
       .map(Number);
@@ -353,8 +351,7 @@ export class StorageHelper {
 
     if(!isCloud && !isDisk) {
       // both isCloud and isDisk === false!
-      console.warn("Please select either disk or cloud to download data.");
-      return;
+      throw new Error("Please select either disk or cloud to download data.");
     }
   }
 }
