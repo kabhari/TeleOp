@@ -123,7 +123,7 @@ def stream_coordinations_logic():
 
         # SEND COORDINATION HERE --------------------------------------------------------------
         # construct the message
-        xy = mock_data.coordinate(DATA_RATE_COORDINATIONS)
+        xy = mock_data.coordinate(DATA_RATE_COORDINATIONS) # Replace method HERE
         msg = coordinate_pb2.StreamCoordinateRequest(
             x=xy[0],
             y=xy[1],
@@ -155,7 +155,6 @@ def is_calibrated():
 
 
 # CALIBRATION PARAMETERS AND END CONDITION --------------------------------------------------------------
-
 
 def run():
     """Create  the client"""
