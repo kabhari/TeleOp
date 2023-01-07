@@ -19,6 +19,7 @@ export default class AppContext {
   static serverGRPC: ServerGRPC;
 
   static lastCalibrationEvent: CalibrationEvent | undefined;
+  static isRecording: boolean | undefined;
 
   private static appState: AppState;
 

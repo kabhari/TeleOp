@@ -11,6 +11,8 @@ const props = defineProps<{
   data: ICoordinate;
   annotation: Array<ICoordinateSaved>;
   appState: AppState;
+  is_grid: Boolean;
+  overlay_img: any;
 }>();
 
 const clientRPC = inject(ClientRPCKey) as ClientIPC; // Get the client RPC instance that is injected early on
@@ -27,24 +29,35 @@ const calibrationColors = [
 const calibrationTexts = ["1", "2", "3", "4"];
 let calibrationQuads: Path2D[];
 
+async function getCanvasData(format: string) {
+    return canvas.value?.toDataURL(format);
+}
+
+defineExpose({
+  getCanvasData
+});
+
 onMounted(() => {
   // Register a listener for incoming coordinates
   const ctxBase = canvas.value?.getContext("2d");
   if (ctxBase) {
     const ctx = new CanvasDrawer(ctxBase);
-    ctx.clear();
+    ctx.clear(props.is_grid);
     setInterval(() => {
-      ctx.clear();
+      ctx.clear(props.is_grid);
+      // first draw the overlay if not undefined
+      if(props.overlay_img) {
+          drawOverlayImage(ctx);
+        }
+      // then draw coordinates
       if (props.appState === AppState.STREAMING) {
         drawStream(ctx);
+        // and finally draw annotations
         if (props.annotation) {
           drawAnnotations(ctx);
         }
       } else if (props.appState === AppState.CALIBRATING) {
-        calibrationQuads = ctx.drawCalibrationQuads(
-          calibrationColors,
-          calibrationTexts
-        );
+        calibrationQuads = ctx.drawCalibrationQuads(calibrationColors, calibrationTexts);
       }
     }, updateRate);
   } else {
@@ -83,6 +96,10 @@ function drawStream(ctx: CanvasDrawer) {
   ctx.drawCircle(10 * props.data.x + 250, 10 * props.data.y + 250, 5, "black");
 }
 
+function drawOverlayImage(ctx: CanvasDrawer, x?: number, y?: number, w?: number, h?: number) {
+  ctx.drawImage(props.overlay_img, x!, y!, w!, h!)
+}
+
 function drawAnnotations(ctx: CanvasDrawer) {
   props.annotation.forEach((annotationPoint) => {
     ctx.drawCircle(
@@ -98,13 +115,7 @@ function drawAnnotations(ctx: CanvasDrawer) {
 <template>
   <div>
     <div>
-      <canvas
-        ref="canvas"
-        id="canvas"
-        width="500"
-        height="500"
-        @click="handleClick"
-      />
+      <canvas ref="canvas" id="canvas" width="500" height="500" @click="handleClick" />
     </div>
   </div>
 </template>

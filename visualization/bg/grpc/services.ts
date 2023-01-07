@@ -18,14 +18,14 @@ import {
   StreamVideoResponse,
 } from "../../proto/coordinate";
 
-import ServerIPC from "../ipc/server";
 import CoordinatesModel, {
   ICoordinate,
   ICoordinates,
 } from "../data/models/coordinates.model";
+
 import AppContext from "../appContext";
 import { AppState } from "../../shared/Enums";
-
+import { VideoEvent } from "../video";
 class Video implements VideoServer {
   [method: string]: UntypedHandleCall;
 
@@ -37,6 +37,12 @@ class Video implements VideoServer {
       .on("data", async (req: StreamVideoRequest) => {
         // Forward the data over the IPC channel
         AppContext.serverIPC.streamVideo(req);
+
+        // Return if there is no data or the recording is in neutral state (havent started or stopped)
+        if (!!!req.data || AppContext.isRecording === undefined) return;
+
+        // Otherwise manage video recoding (start/stop depending on user's input)
+        VideoEvent.manageVideoRecording(req);
       })
       .on("error", (err: Error) => {
         console.error("Something went wrong during streaming", err.message);

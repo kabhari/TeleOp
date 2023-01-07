@@ -54,6 +54,16 @@ export default class CanvasDrawer {
     this.ctx.stroke();
   }
 
+  drawImage(overlay_img: any, x?: number, y?: number, w?: number, h?: number) {
+    let image = new Image;
+    image.src = overlay_img;
+    if(!x) {x = 0;}
+    if(!y) {y = 0;}
+    if(!w) {w = this.canvas_w;}
+    if(!h) {h = this.canvas_h;}
+    this.ctx.drawImage(image, x!, y!, w!, h!)
+  }
+
   /* 
   How to call:--------------------------- 
       const quads = this.drawCalibrationQuads(['rgb(255, 0, 0, 0.2)', 'rgb(0, 255, 0, 0.2)', 'rgb(255, 255, 0, 0.2)', 'rgb(0, 0, 255, 0.2)'])
@@ -182,8 +192,8 @@ export default class CanvasDrawer {
     return [quad_one, quad_two, quad_three, quad_four];
   }
 
-  clear() {
+  clear(isGrid: Boolean) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.drawGrid(this._padding, this.canvas_h, this.canvas_w);
+    if (isGrid) this.drawGrid(this._padding, this.canvas_h, this.canvas_w);
   }
 }

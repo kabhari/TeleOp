@@ -13,13 +13,12 @@ let toggleCalibrate = ref<boolean>(true);
 const props = defineProps<{
   isAnnotationDisplayed: boolean;
   appState: AppState;
+  isOverlaid: boolean;
 }>();
 </script>
 
 <template>
-  <div
-    class="flex flex-col flex-grow w-40 flex-grow flex flex-col justify-content h-96"
-  >
+  <div class="flex flex-col flex-grow w-40 flex-grow flex flex-col justify-content h-96">
     <a
       href="#"
       class="panel-item"
@@ -31,11 +30,7 @@ const props = defineProps<{
     </a>
 
     <a>
-      <a
-        v-if="appState == AppState.CALIBRATING"
-        class="panel-item disabled"
-        href="#"
-      >
+      <a v-if="appState == AppState.CALIBRATING" class="panel-item disabled" href="#">
         <IconCalibrating /> Calibrating
       </a>
       <a
@@ -65,9 +60,28 @@ const props = defineProps<{
     <a
       href="#"
       class="panel-item"
-      :class="{ disabled: appState != AppState.STREAMING }"
+      :class="{ enabled: appState != AppState.STREAMING }"
+      @click="$emit('record')"
     >
       <IconCamera /> Record
+    </a>
+
+    <a
+      class="panel-item"
+      href="#"
+      @click="$emit('overlay')"
+    >
+      <IconEyeOn v-if="isOverlaid" />
+      <IconEyeOff v-else />
+      {{ isOverlaid ? "Overlay:Off" : "Overlay:On" }}
+    </a>
+
+    <a 
+     class="panel-item"
+     href="#"
+     @click="$emit('snapshot')"
+    >
+    <IconCamera /> Snapshot
     </a>
   </div>
 </template>

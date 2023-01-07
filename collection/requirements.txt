@@ -2,4 +2,4 @@ black
 grpcio
 grpcio-tools
 python-dotenv
-pillow
+opencv-python

@@ -1,8 +1,10 @@
+import { ISnapshot } from './../../shared/interfaces';
+import { VideoEvent, ImageEvent } from "../video";
 import AppContext from "../appContext";
 import CoordinateSavedModel, {
   ICoordinateSaved,
 } from "../data/models/coordinatesaved.model";
-import { IServicesIPC } from "../../shared/Interfaces";
+import { IServicesIPC, IPlayBack } from "../../shared/Interfaces";
 import { AppState } from "../../shared/Enums";
 import { CalibrationEvent } from "../calibration";
 
@@ -23,6 +25,14 @@ export default class ServicesIPC implements IServicesIPC {
     console.log("annotate", savedPointModel);
     const coordinate = new CoordinateSavedModel(savedPointModel);
     await coordinate.save();
+  }
+
+  async record(): Promise<boolean> {
+    if (AppContext.isRecording === undefined) {
+      AppContext.isRecording = false;
+    }
+    AppContext.isRecording = !AppContext.isRecording;
+    return true; // todo: return based on the state
   }
 
   // return all the annotated points that belongs to current session
@@ -47,6 +57,22 @@ export default class ServicesIPC implements IServicesIPC {
 
   async getAppState(): Promise<AppState> {
     return AppContext.getAppState();
+  }
+
+  async playBack(playBack: IPlayBack): Promise<Buffer[]> {
+    return VideoEvent.importVideoFromStorage(
+      playBack.zipFile,
+      playBack.isCloud,
+      playBack.isDisk
+    );
+  }
+
+  async snapshot(snap: ISnapshot): Promise<void> { // todo: return state as boolean
+    let buff = Buffer.from(snap.imageFile, 'base64');
+    ImageEvent.exportImageToStorage(
+      buff, 
+      snap.isCloud,
+      snap.isDisk);
   }
 }
 

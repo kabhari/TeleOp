@@ -1,6 +1,5 @@
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
-
 const isDev = process.env.IS_DEV == "true" ? true : false;
 
 let { fork } = require('child_process')
