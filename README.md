@@ -1,7 +1,7 @@
-# cathpilot
+# TeleOp
 
 ## Setup
-
+---
 ### Install
 
 - Ensure you have the [Protocol Buffer Compiler](https://grpc.io/docs/protoc-installation/) installed globally. In case of Windows machines, please add `protoc` to your path.
@@ -13,7 +13,7 @@
 You may install the `Vue Volar extension Pack` if you're using Visual Stuido Code as your IDE & plan to edit the front-end code; otherwise, skip to the next step.
 
 ## Execute
-
+---
 Make sure to run `Visualization` module first followed by the `Collection` module:
 
 ### Visualization
@@ -25,11 +25,11 @@ Make sure to run `Visualization` module first followed by the `Collection` modul
 - Run `npm run c:dev`
 
 ## Format
-
+---
 - Run `npm run format`
 
 ## Setting up environment variables
-
+---
 ### Local machine
 
 - Create an empty file called `.env` under the `collection` directory and add this line to the file to indicate the server and port number for our GRPC host:
@@ -57,16 +57,25 @@ BUCKET_NAME=your_bucket_name
 For more information, you can always refer to `.env.template` files under `visualization` and `collection` directories.
 
 ## MonogoDB
-
+---
 Please refer to our [README file](visualization/bg/Data/README.md) for more information.
 
-# Minio
-
-(In case of not using docker:) please download Minio Server and run it before firing the app.
+## Minio
+---
+Please download Minio Server and run it before firing the app.
 Example for Windows machine: `./minio.exe server ./`
 
-## Tips
+## Data Flow
+---
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./flow_dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./flow_light.svg">
+  <img alt="TeleOp Data Flow">
+</picture>
 
+## Tips
+---
 - Make sure to run `c:dev` after the visualization module is up and running. If you encounter an error after running `npm run c:dev` too quickly, please try again. This won't be an issue in the prod version.
 - Should you encounter the following (or similar) error in the visualization module after pulling in new changes or installing a new library, you may delete the `visualization > dist` directory and try running `npm run v:dev` again:
   - `Error: The following dependencies are imported but could not be resolved: Index.js (imported by C:/code/cathpilot/visualization/dist/bg/server-dev.html)`)
+
